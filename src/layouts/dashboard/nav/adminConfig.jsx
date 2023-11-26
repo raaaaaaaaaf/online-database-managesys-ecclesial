@@ -5,9 +5,9 @@ import SvgColor from '../../../components/svg-color';
 
 const icon = (name) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ width: 1, height: 1 }} />;
 
-const navConfig = [
+const adminConfig = [
   {
-    title: 'dashboard',
+    title: 'Admin Dash',
     path: '/dashboard/app',
     icon: icon('ic_analytics'),
   },
@@ -38,4 +38,4 @@ const navConfig = [
   },
 ];
 
-export default navConfig;
+export default adminConfig;

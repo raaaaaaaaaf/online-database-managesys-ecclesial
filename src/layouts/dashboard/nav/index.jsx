@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 // @mui
 import { styled, alpha } from '@mui/material/styles';
@@ -13,8 +13,10 @@ import Logo from '../../../components/logo';
 import Scrollbar from '../../../components/scrollbar';
 import NavSection from '../../../components/nav-section';
 //
-import navConfig from './config';
-
+import adminConfig from './adminConfig';
+import userConfig from './userConfig';
+import { AuthContext } from '../../../context/AuthContext';
+import avt from '/assets/images/avatars/avatar_default.jpg'
 // ----------------------------------------------------------------------
 
 const NAV_WIDTH = 280;
@@ -36,6 +38,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav }) {
   const { pathname } = useLocation();
+  const {currentUser, userData, loading} = useContext(AuthContext);
 
   const isDesktop = useResponsive('up', 'lg');
 
@@ -47,6 +50,10 @@ export default function Nav({ openNav, onCloseNav }) {
   }, [pathname]);
 
   const renderContent = (
+<>
+      {loading ? (
+    <div>...</div>
+       ) : (
     <Scrollbar
       sx={{
         height: 1,
@@ -60,49 +67,31 @@ export default function Nav({ openNav, onCloseNav }) {
       <Box sx={{ mb: 5, mx: 2.5 }}>
         <Link underline="none">
           <StyledAccount>
-            <Avatar src={account.photoURL} alt="photoURL" />
+            <Avatar src={currentUser.photoURL ?? avt} alt="photoURL" />
 
             <Box sx={{ ml: 2 }}>
               <Typography variant="subtitle2" sx={{ color: 'text.primary' }}>
-                {account.displayName}
+                {userData.displayName}
               </Typography>
 
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {account.role}
+                {userData.role}
               </Typography>
             </Box>
           </StyledAccount>
         </Link>
       </Box>
-
-      <NavSection data={navConfig} />
-
+      {userData.role === 'Admin' ? (
+          <NavSection data={adminConfig} />
+        ) : (
+          <NavSection data={userConfig} />
+      )}
       <Box sx={{ flexGrow: 1 }} />
 
-      <Box sx={{ px: 2.5, pb: 3, mt: 10 }}>
-        <Stack alignItems="center" spacing={3} sx={{ pt: 5, borderRadius: 2, position: 'relative' }}>
-          <Box
-            component="img"
-            src="/assets/illustrations/illustration_avatar.png"
-            sx={{ width: 100, position: 'absolute', top: -50 }}
-          />
-
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography gutterBottom variant="h6">
-              Get more?
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              From only $69
-            </Typography>
-          </Box>
-
-          <Button href="https://material-ui.com/store/items/minimal-dashboard/" target="_blank" variant="contained">
-            Upgrade to Pro
-          </Button>
-        </Stack>
-      </Box>
     </Scrollbar>
+  )}
+</>
+
   );
 
   return (
