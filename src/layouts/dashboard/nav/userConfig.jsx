@@ -22,14 +22,14 @@ const userConfig = [
     icon: icon('ic_cart'),
   },
   {
-    title: 'blog',
-    path: '/dashboard/blog',
-    icon: icon('ic_blog'),
+    title: 'Request Marriage',
+    path: '/client/marriage',
+    icon: icon('ic_cart'),
   },
   {
-    title: 'login',
-    path: '/login',
-    icon: icon('ic_lock'),
+    title: 'Certificates',
+    path: '/client/certificates',
+    icon: icon('ic_cart'),
   },
   {
     title: 'Not found',

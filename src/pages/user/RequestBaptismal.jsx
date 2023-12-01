@@ -76,6 +76,7 @@ const RequestBaptismal = () => {
         pob: pob.toDate(),
         sponsors: sponsors,
         docType: "Baptismal",
+        isApproved: false,
         timeStamp: serverTimestamp()
       }
       await addDoc(docRef, data)
@@ -91,7 +92,7 @@ const RequestBaptismal = () => {
   }
   return (
     <>
-      <Helmet></Helmet>
+      <Helmet>Request Baptismal</Helmet>
       <Container component="main" maxWidth="sm" sx={{ mb: 4 }}>
         <Paper
           variant="outlined"
@@ -104,7 +105,7 @@ const RequestBaptismal = () => {
             mb={3}
           >
             <Typography variant="h4" gutterBottom>
-              Request Baptismal
+              Request Baptismal Certificate
             </Typography>
             <Button onClick={handleAdd} variant="contained">Submit</Button>
           </Stack>

@@ -16,6 +16,7 @@ import UserDashboardAppPage from './pages/user/DashboardAppPage';
 import Loading from './components/loading/Loading';
 import CertificatesPage from './pages/user/CertificatesPage';
 import RequestBaptismal from './pages/user/RequestBaptismal';
+import RequestMarriage from './pages/user/RequestMarriage';
 
 // ----------------------------------------------------------------------
 
@@ -89,6 +90,8 @@ export default function Router() {
         { element: <ProtectedRoute ><Navigate to="/client/userApp" /></ProtectedRoute>, index: true },
         { path: 'userApp', element: <ProtectedRoute ><UserDashboardAppPage /></ProtectedRoute> },
         { path: 'baptismal', element: <ProtectedRoute ><RequestBaptismal /></ProtectedRoute> },
+        { path: 'marriage', element: <ProtectedRoute ><RequestMarriage /></ProtectedRoute> },
+        { path: 'certificates', element: <ProtectedRoute ><CertificatesPage /></ProtectedRoute> },
       ]
     },
 
