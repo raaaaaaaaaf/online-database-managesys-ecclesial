@@ -53,34 +53,6 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
 
-  const signInWithGoogle = async () => {
-    try {
-      const res = await signInWithPopup(auth, provider)
-      const user = auth.currentUser;
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-        role: "User"
-      })
-      Swal.fire({
-        icon: 'success',
-        title: 'Login Successfully',
-        showConfirmButton: false,
-        timer: 1500
-      })
-      navigate('/Dashboard/app')
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Something went wrong!',
-        text: 'Try Again!',
-        
-      })
-      console.error(err);
-    }
-    
-  }
 
   return (
     <>
@@ -118,25 +90,9 @@ export default function LoginPage() {
               
             </Typography>
 
-            <Stack direction="row" spacing={2}>
-              <Button onClick={signInWithGoogle} fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:google-fill" color="#DF3E30" width={22} height={22} />
-              </Button>
 
-              {/* <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:facebook-fill" color="#1877F2" width={22} height={22} />
-              </Button>
 
-              <Button fullWidth size="large" color="inherit" variant="outlined">
-                <Iconify icon="eva:twitter-fill" color="#1C9CEA" width={22} height={22} />
-              </Button> */}
-            </Stack>
 
-            <Divider sx={{ my: 3 }}>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                OR
-              </Typography>
-            </Divider>
 
             <LoginForm />
           </StyledContent>

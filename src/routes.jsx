@@ -14,6 +14,8 @@ import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './context/AuthContext';
 import UserDashboardAppPage from './pages/user/DashboardAppPage';
 import Loading from './components/loading/Loading';
+import CertificatesPage from './pages/user/CertificatesPage';
+import RequestBaptismal from './pages/user/RequestBaptismal';
 
 // ----------------------------------------------------------------------
 
@@ -86,6 +88,7 @@ export default function Router() {
       children: [
         { element: <ProtectedRoute ><Navigate to="/client/userApp" /></ProtectedRoute>, index: true },
         { path: 'userApp', element: <ProtectedRoute ><UserDashboardAppPage /></ProtectedRoute> },
+        { path: 'baptismal', element: <ProtectedRoute ><RequestBaptismal /></ProtectedRoute> },
       ]
     },
 

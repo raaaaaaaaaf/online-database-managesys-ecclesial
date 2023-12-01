@@ -17,8 +17,8 @@ const userConfig = [
     icon: icon('ic_user'),
   },
   {
-    title: 'product',
-    path: '/dashboard/products',
+    title: 'Request Baptismal',
+    path: '/client/baptismal',
     icon: icon('ic_cart'),
   },
   {

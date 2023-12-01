@@ -15,12 +15,13 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { auth, db } from "../../firebase/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
+import Loading from "../loading/Loading";
 
-const AddUser = ({ open, onClose }) => {
+const EditUser = ({ open, onClose, id }) => {
   const [dob, setDob] = useState(null);
   const [age, setAge] = useState("");
   const [civilStatus, setCivilStatus] = useState("");
@@ -28,10 +29,10 @@ const AddUser = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    pass: "",
     contact: "",
     address: "",
   });
+  
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -40,6 +41,8 @@ const AddUser = ({ open, onClose }) => {
       [name]: value,
     }));
   };
+
+
 
   const handleDobChange = (date) => {
     setDob(date);
@@ -73,36 +76,30 @@ const AddUser = ({ open, onClose }) => {
     setCourse(event.target.value);
   };
 
-  const handleAdd = async () => {
+  const handleEdit = async () => {
     try {
-      // Create user account
-      const res = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.pass
-      );
 
-      // Update user profile
-      await updateProfile(res.user, {
-        displayName: formData.fullName,
-      });
-      await setDoc(doc(db, "users", res.user.uid), {
-        uid: res.user.uid,
+      const userRef = doc(db, "users", id)
+      const newData = {
         displayName: formData.fullName,
         email: formData.email,
         contact: formData.contact,
         address: formData.address,
         age: age,
-        dob: dob,
+        dob: dob.toDate(),
         civilStatus: civilStatus,
         course: course,
         role: "User",
-      });
-      toast.success("Information has been added.", {
+      }
+
+
+      await updateDoc(userRef, newData)
+      toast.success("Member Information has been edited.", {
         position: "top-right",
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
+      onClose()
     } catch (err) {
       toast.error(err.message, {
         position: "top-right",
@@ -114,11 +111,12 @@ const AddUser = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>Member Information</DialogTitle>
-      <DialogContent>
+    <Dialog open={open} onClose={onClose}  >
+      <DialogTitle>Edit Member Information</DialogTitle>
+
+      <DialogContent >
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <TextField
               margin="dense"
               required
@@ -131,35 +129,6 @@ const AddUser = ({ open, onClose }) => {
               fullWidth
               variant="outlined"
             />
-            <TextField
-              margin="dense"
-              required
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              label="Email"
-              placeholder="Email"
-              fullWidth
-              variant="outlined"
-            />
-            <TextField
-              margin="dense"
-              required
-              type="password"
-              id="pass"
-              name="pass"
-              value={formData.pass}
-              onChange={handleInputChange}
-              label="Password"
-              placeholder="Password"
-              fullWidth
-              variant="outlined"
-            />
-          </Grid>
-
-          <Grid item xs={4}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Date of Birth"
@@ -169,6 +138,7 @@ const AddUser = ({ open, onClose }) => {
                 renderInput={(params) => <TextField {...params} />}
               />
             </LocalizationProvider>
+
             <FormControl
               fullWidth
               variant="outlined"
@@ -188,24 +158,22 @@ const AddUser = ({ open, onClose }) => {
                 <MenuItem value="Widowed">Widowed</MenuItem>
               </Select>
             </FormControl>
-
-            <FormControl fullWidth variant="outlined">
-              <InputLabel id="course-label">Grade Level</InputLabel>
-              <Select
-                labelId="course-label"
-                id="course-label"
-                value={course}
-                onChange={handleCourseChange}
-                label="Grade Level"
-              >
-                <MenuItem value="Elementary">Elementary</MenuItem>
-                <MenuItem value="High School">High School</MenuItem>
-                <MenuItem value="College">College</MenuItem>
-              </Select>
-            </FormControl>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid item xs={6}>
+          <TextField
+              margin="dense"
+              required
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              label="Address"
+              placeholder="Address"
+              fullWidth
+              variant="outlined"
+            />
+
             <TextField
               margin="dense"
               id="age"
@@ -228,26 +196,35 @@ const AddUser = ({ open, onClose }) => {
               variant="outlined"
               type="number" // Set the type to "tel" for telephone input
             />
-            <TextField
-              margin="dense"
-              required
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              label="Address"
-              placeholder="Address"
-              fullWidth
-              variant="outlined"
-            />
+
+            {/* 
+            <FormControl fullWidth variant="outlined">
+              <InputLabel id="course-label">Grade Level</InputLabel>
+              <Select
+                labelId="course-label"
+                id="course-label"
+                value={course}
+                onChange={handleCourseChange}
+                label="Grade Level"
+              >
+                <MenuItem value="Elementary">Elementary</MenuItem>
+                <MenuItem value="High School">High School</MenuItem>
+                <MenuItem value="College">College</MenuItem>
+              </Select>
+            </FormControl> */}
+          </Grid>
+
+          <Grid item xs={12}>
+
           </Grid>
         </Grid>
       </DialogContent>
+
       <DialogActions>
         <Button onClick={onClose} color="primary">
           Close
         </Button>
-        <Button onClick={handleAdd} color="primary" variant="contained">
+        <Button onClick={handleEdit} color="primary" variant="contained">
           Submit
         </Button>
       </DialogActions>
@@ -255,4 +232,4 @@ const AddUser = ({ open, onClose }) => {
   );
 };
 
-export default AddUser;
+export default EditUser;
