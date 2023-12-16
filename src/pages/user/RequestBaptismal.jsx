@@ -24,13 +24,14 @@ import { useNavigate } from "react-router-dom";
 const RequestBaptismal = () => {
   const [dob, setDob] = useState(null);
   const [pob, setPob] = useState(null);
-  const { currentUser, userData } = useContext(AuthContext)
+  const { currentUser, userData } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     fullName: "",
     motherName: "",
     fatherName: "",
     placeofbirth: "",
-  })
+    rev: "",
+  });
   const [sponsors, setSponsors] = useState([
     {
       name: "",
@@ -55,11 +56,10 @@ const RequestBaptismal = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
-    ...prevData,
-    [name]: value,
+      ...prevData,
+      [name]: value,
     }));
-};
-
+  };
 
   const addSponsors = () => {
     setSponsors([...sponsors, { name: "" }]);
@@ -73,12 +73,12 @@ const RequestBaptismal = () => {
 
   const handleAdd = async () => {
     try {
-      
-      if(
+      if (
         !formData.fullName ||
         !formData.fatherName ||
         !formData.motherName ||
         !formData.placeofbirth ||
+        !formData.rev ||
         !dob ||
         !pob ||
         !sponsors
@@ -90,13 +90,14 @@ const RequestBaptismal = () => {
         });
         return; // Exit the function if validation fails
       }
-      
-      const docRef = collection(db, "data_certificates")
+
+      const docRef = collection(db, "data_certificates");
       const data = {
         fullName: formData.fullName,
         fatherName: formData.fatherName,
         motherName: formData.motherName,
         placeofbirth: formData.placeofbirth,
+        rev: formData.rev,
         dob: dob.toDate(),
         pob: pob.toDate(),
         sponsors: sponsors,
@@ -105,19 +106,19 @@ const RequestBaptismal = () => {
         userName: userData.displayName,
         email: userData.email,
         uid: uid,
-        timeStamp: serverTimestamp()
-      }
-      await addDoc(docRef, data)
+        timeStamp: serverTimestamp(),
+      };
+      await addDoc(docRef, data);
       toast.success("Requested Succesfully", {
         position: "top-right",
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
-      navigate('/client/certificates')
-    } catch(err) {
-      console.error(err)
+      navigate("/client/certificates");
+    } catch (err) {
+      console.error(err);
     }
-  }
+  };
   return (
     <>
       <Helmet>Request Baptismal</Helmet>
@@ -135,7 +136,9 @@ const RequestBaptismal = () => {
             <Typography variant="h4" gutterBottom>
               Request Baptismal Certificate
             </Typography>
-            <Button onClick={handleAdd} variant="contained">Submit</Button>
+            <Button onClick={handleAdd} variant="contained">
+              Submit
+            </Button>
           </Stack>
 
           <Grid container spacing={2}>
@@ -177,6 +180,36 @@ const RequestBaptismal = () => {
                 fullWidth
                 variant="outlined"
               />
+              {sponsors.map((record, index) => (
+                <TextField
+                  margin="dense"
+                  required
+                  name={`name${index}`}
+                  value={record.name}
+                  onChange={(e) => handleAddSponsors(e, index, "name")}
+                  label="Sponsors"
+                  placeholder="Sponsors"
+                  fullWidth
+                  variant="outlined"
+                  InputProps={
+                    sponsors.length > 1
+                      ? {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => handleDeleteSponsor(index)}
+                                style={{ color: "red" }}
+                              >
+                                <Iconify icon="material-symbols-light:delete-outline" />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }
+                      : {}
+                  }
+                />
+              ))}
+              <Button onClick={addSponsors}>Add Another Sponsor</Button>
             </Grid>
             {/* Left Column */}
             <Grid item xs={6}>
@@ -210,38 +243,18 @@ const RequestBaptismal = () => {
                   renderInput={(params) => <TextField {...params} />}
                 />
               </LocalizationProvider>
-            </Grid>
-
-            {sponsors.map((record, index) => (
               <TextField
-                style={{ marginLeft: "15px" }}
-                margin="dense"
+                sx={{ mt: 1.5, width: "100%" }}
                 required
-                name={`name${index}`}
-                value={record.name}
-                onChange={(e) => handleAddSponsors(e, index, "name")}
-                label="Sponsors"
-                placeholder="Sponsors"
+                id="rev"
+                name="rev"
+                value={formData.rev}
+                onChange={handleInputChange}
+                label="Reverend"
+                placeholder="Father Name"
                 fullWidth
                 variant="outlined"
-                InputProps={
-                  sponsors.length > 1
-                    ? {
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => handleDeleteSponsor(index)} style={{ color: 'red' }}> 
-                              <Iconify icon="material-symbols-light:delete-outline" />
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }
-                    : {}
-                }
               />
-            ))}
-
-            <Grid item xs={12} style={{ textAlign: "center" }}>
-              <Button onClick={addSponsors}>Add Another Sponsor</Button>
             </Grid>
           </Grid>
         </Paper>

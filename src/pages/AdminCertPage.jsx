@@ -177,6 +177,7 @@ export default function AdminCertPage() {
           displayName: userData.displayName,
           type: "approved",
           certificatesID: row.id,
+          docType: row.docType,
           timestamp: serverTimestamp(),
           isRead: false,
         };

@@ -36,6 +36,7 @@ import { AuthContext } from "../../context/AuthContext";
 import EditBaptismal from "../../components/modal/EditBaptismal";
 import EditMarriage from "../../components/modal/EditMarriage";
 import Loading from "../../components/loading/Loading";
+import { Link } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
@@ -330,9 +331,24 @@ export default function CertificatesPage() {
                               <IconButton size="small">
                                 <Iconify icon={"carbon:delete"} />
                               </IconButton>
-                              <IconButton size="small" disabled={!isApproved}>
-                                <Iconify icon={"carbon:view"} />
-                              </IconButton>
+
+                              <Link
+                                to={
+                                  docType === "Baptismal"
+                                    ? `baptismal/${id}`
+                                    : docType === "Marriage"
+                                    ? `marriage/${id}`
+                                    : ""
+                                }
+                                style={{
+                                  textDecoration: "none",
+                                  color: "black",
+                                }}
+                              >
+                                <IconButton size="small" disabled={!isApproved}>
+                                  <Iconify icon={"carbon:view"} />
+                                </IconButton>
+                              </Link>
                             </TableCell>
                           </TableRow>
                         );

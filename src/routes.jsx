@@ -19,6 +19,7 @@ import RequestBaptismal from './pages/user/RequestBaptismal';
 import RequestMarriage from './pages/user/RequestMarriage';
 import AdminCertPage from './pages/AdminCertPage';
 import ViewBaptismal from './pages/user/ViewBaptismal';
+import ViewMarriage from './pages/user/ViewMarriage';
 
 // ----------------------------------------------------------------------
 
@@ -96,6 +97,7 @@ export default function Router() {
         { path: 'marriage', element: <ProtectedRoute ><RequestMarriage /></ProtectedRoute> },
         { path: 'certificates', element: <ProtectedRoute ><CertificatesPage /></ProtectedRoute> },
         { path: 'certificates/baptismal/:id', element: <ProtectedRoute ><ViewBaptismal /></ProtectedRoute> },
+        { path: 'certificates/marriage/:id', element: <ProtectedRoute ><ViewMarriage /></ProtectedRoute> },
       ]
     },
 

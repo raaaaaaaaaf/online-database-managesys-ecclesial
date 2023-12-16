@@ -25,16 +25,13 @@ const RequestMarriage = () => {
   const [dobf, setDobf] = useState(null);
   const [dobm, setDobm] = useState(null);
   const [dom, setDom] = useState(null);
-  const { currentUser, userData } = useContext(AuthContext)
+  const { currentUser, userData } = useContext(AuthContext);
   const [formData, setFormData] = useState({
-    fullName: "",
-    motherName: "",
-    fatherName: "",
+    gfullName: "",
 
-    fullFName: "",
-    motherFName: "",
-    fatherFName: "",
+    bfullName: "",
 
+    place: "",
   });
 
   const uid = currentUser.uid;
@@ -61,15 +58,10 @@ const RequestMarriage = () => {
 
   const handleAdd = async () => {
     try {
-      if(
-        !formData.fullName ||
-        !formData.fatherName ||
-        !formData.motherName ||
-
-        !formData.fullFName ||
-        !formData.fatherFName ||
-        !formData.motherFName ||
-        
+      if (
+        !formData.gfullName ||
+        !formData.bfullName ||
+        !formData.place ||
         !dobf ||
         !dobm ||
         !dom
@@ -83,14 +75,9 @@ const RequestMarriage = () => {
       }
       const docRef = collection(db, "data_certificates");
       const data = {
-        fullName: formData.fullName,
-        fatherName: formData.fatherName,
-        motherName: formData.motherName,
-
-        fullFName: formData.fullFName,
-        fatherFName: formData.fatherFName,
-        motherFName: formData.motherFName,
-        
+        gfullName: formData.gfullName,
+        bfullName: formData.bfullName,
+        place: formData.place,
         dobf: dobf.toDate(),
         dobm: dobm.toDate(),
         dom: dom.toDate(),
@@ -107,7 +94,7 @@ const RequestMarriage = () => {
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
-      navigate('/client/certificates')
+      navigate("/client/certificates");
     } catch (err) {
       console.error(err);
     }
@@ -137,46 +124,32 @@ const RequestMarriage = () => {
           <Grid container spacing={2}>
             {/* Right Column */}
             <Grid item xs={6}>
-            <Typography variant="subtitle1">GROOM</Typography>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Date of Marriage"
+                  sx={{ mt: 1, mb: 0.5, width: "100%" }}
+                  value={dom}
+                  onChange={handleDomChange}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </LocalizationProvider>
+
               <TextField
                 margin="dense"
                 required
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
+                id="gfullName"
+                name="gfullName"
+                value={formData.gfullName}
                 onChange={handleInputChange}
-                label="Full Name"
+                label="Groom Full Name"
                 placeholder="Full Name"
                 fullWidth
                 variant="outlined"
               />
-              <TextField
-              margin="dense"
-                required
-                id="fatherName"
-                name="fatherName"
-                value={formData.fatherName}
-                onChange={handleInputChange}
-                label="Father Name"
-                placeholder="Father Name"
-                fullWidth
-                variant="outlined"
-              />
-              <TextField
-                margin="dense"
-                required
-                id="motherName"
-                name="motherName"
-                value={formData.motherName}
-                onChange={handleInputChange}
-                label="Mother Name"
-                placeholder="Mother Name"
-                fullWidth
-                variant="outlined"
-              />
+
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Date of Birth"
+                  label="Groom Date of Birth"
                   sx={{ mt: 1, width: "100%" }}
                   value={dobm}
                   onChange={handleDobmChange}
@@ -186,46 +159,35 @@ const RequestMarriage = () => {
             </Grid>
             {/* Left Column */}
             <Grid item xs={6}>
-            <Typography variant="subtitle1">BRIDE</Typography>
-            <TextField
-                margin="dense"
-                required
-                id="fullFName"
-                name="fullFName"
-                value={formData.fullFName}
-                onChange={handleInputChange}
-                label="Full Name"
-                placeholder="Full Name"
-                fullWidth
-                variant="outlined"
-              />
-              <TextField
-              margin="dense"
-                required
-                id="fatherFName"
-                name="fatherFName"
-                value={formData.fatherFName}
-                onChange={handleInputChange}
-                label="Father Name"
-                placeholder="Father Name"
-                fullWidth
-                variant="outlined"
-              />
               <TextField
                 margin="dense"
                 required
-                id="motherFName"
-                name="motherFName"
-                value={formData.motherFName}
+                id="place"
+                name="place"
+                value={formData.place}
                 onChange={handleInputChange}
-                label="Mother Name"
-                placeholder="Mother Name"
+                label="Place of Marriage"
+                placeholder="Place of Marriage"
                 fullWidth
                 variant="outlined"
               />
+
+              <TextField
+                margin="dense"
+                required
+                id="bfullName"
+                name="bfullName"
+                value={formData.bfullName}
+                onChange={handleInputChange}
+                label="Bride Full Name"
+                placeholder="Bride Full Name"
+                fullWidth
+                variant="outlined"
+              />
+
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Date of Birth"
+                  label="Bride Date of Birth"
                   sx={{ mt: 1, width: "100%" }}
                   value={dobf}
                   onChange={handleDobfChange}
@@ -233,15 +195,6 @@ const RequestMarriage = () => {
                 />
               </LocalizationProvider>
             </Grid>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Date of Marriage"
-                  sx={{ mt: 1.5, ml: 2, width: "100%" }}
-                  value={dom}
-                  onChange={handleDomChange}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
           </Grid>
         </Paper>
       </Container>

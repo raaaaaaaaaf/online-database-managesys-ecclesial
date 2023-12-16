@@ -89,7 +89,6 @@ const NOTIFICATIONS = [
 ];
 
 export default function NotificationsPopover() {
-
   const [open, setOpen] = useState(null);
 
   const [certificates, setCertificates] = useState([]);
@@ -151,8 +150,6 @@ export default function NotificationsPopover() {
     setOpen(null);
   };
 
-
-
   return (
     <>
       <IconButton
@@ -186,7 +183,6 @@ export default function NotificationsPopover() {
               You have {totalUnRead} unread messages
             </Typography>
           </Box>
-
         </Box>
 
         <Divider sx={{ borderStyle: "dashed" }} />
@@ -260,47 +256,56 @@ function NotificationItem({ notification }) {
   };
 
   return (
-    <Link to={`certificates/baptismal/${notification.certificatesID}`} style={{ textDecoration: 'none', color: 'black'}}>
-    <ListItemButton
-      onClick={() => setIsUnRead(notification.id)}
-      sx={{
-        py: 1.5,
-        px: 2.5,
-        mt: "1px",
-        ...(notification.isRead && {
-          bgcolor: "action.selected",
-        }),
-      }}
+    <Link
+      to={
+        notification.docType === "Baptismal"
+          ? `certificates/baptismal/${notification.certificatesID}`
+          : notification.docType === "Marriage"
+          ? `certificates/marriage/${notification.certificatesID}`
+          : ""
+      }
+      style={{ textDecoration: "none", color: "black" }}
     >
-      <ListItemAvatar>
-        <Avatar sx={{ bgcolor: "background.neutral" }}>{avatar}</Avatar>
-      </ListItemAvatar>
-      <ListItemText
-        primary={title}
-        secondary={
-          <Typography
-            variant="caption"
-            sx={{
-              mt: 0.5,
-              display: "flex",
-              alignItems: "center",
-              color: "text.disabled",
-            }}
-          >
-            <Iconify
-              icon="eva:clock-outline"
-              sx={{ mr: 0.5, width: 16, height: 16 }}
-            />
-            {notification.timestamp
-              ? fToNow(new Date(notification.timestamp.seconds * 1000))
-              : "N/A" // Or some default value if createdAt is not defined
-            }
-          </Typography>
-        }
-      />
-    </ListItemButton>
+      <ListItemButton
+        onClick={() => setIsUnRead(notification.id)}
+        sx={{
+          py: 1.5,
+          px: 2.5,
+          mt: "1px",
+          ...(notification.isRead && {
+            bgcolor: "action.selected",
+          }),
+        }}
+      >
+        <ListItemAvatar>
+          <Avatar sx={{ bgcolor: "background.neutral" }}>{avatar}</Avatar>
+        </ListItemAvatar>
+        <ListItemText
+          primary={title}
+          secondary={
+            <Typography
+              variant="caption"
+              sx={{
+                mt: 0.5,
+                display: "flex",
+                alignItems: "center",
+                color: "text.disabled",
+              }}
+            >
+              <Iconify
+                icon="eva:clock-outline"
+                sx={{ mr: 0.5, width: 16, height: 16 }}
+              />
+              {
+                notification.timestamp
+                  ? fToNow(new Date(notification.timestamp.seconds * 1000))
+                  : "N/A" // Or some default value if createdAt is not defined
+              }
+            </Typography>
+          }
+        />
+      </ListItemButton>
     </Link>
-
   );
 }
 
@@ -321,7 +326,12 @@ function renderContent(notification) {
   );
 
   return {
-    avatar: <img alt={notification.displayName} src="/assets/icons/ic_notification_mail.svg" />,
+    avatar: (
+      <img
+        alt={notification.displayName}
+        src="/assets/icons/ic_notification_mail.svg"
+      />
+    ),
     title,
   };
 }
