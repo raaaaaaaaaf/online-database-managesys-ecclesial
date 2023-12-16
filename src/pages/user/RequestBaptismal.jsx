@@ -12,16 +12,19 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Iconify from "../../components/iconify";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const RequestBaptismal = () => {
   const [dob, setDob] = useState(null);
   const [pob, setPob] = useState(null);
+  const { currentUser, userData } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     fullName: "",
     motherName: "",
@@ -33,6 +36,10 @@ const RequestBaptismal = () => {
       name: "",
     },
   ]);
+
+  const uid = currentUser.uid;
+
+  const navigate = useNavigate();
 
   const handleAddSponsors = (event, index, fieldName) => {
     const updatedRecords = [...sponsors];
@@ -66,6 +73,24 @@ const RequestBaptismal = () => {
 
   const handleAdd = async () => {
     try {
+      
+      if(
+        !formData.fullName ||
+        !formData.fatherName ||
+        !formData.motherName ||
+        !formData.placeofbirth ||
+        !dob ||
+        !pob ||
+        !sponsors
+      ) {
+        toast.error("Please fill out all fields.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        });
+        return; // Exit the function if validation fails
+      }
+      
       const docRef = collection(db, "data_certificates")
       const data = {
         fullName: formData.fullName,
@@ -77,6 +102,9 @@ const RequestBaptismal = () => {
         sponsors: sponsors,
         docType: "Baptismal",
         isApproved: false,
+        userName: userData.displayName,
+        email: userData.email,
+        uid: uid,
         timeStamp: serverTimestamp()
       }
       await addDoc(docRef, data)
@@ -85,7 +113,7 @@ const RequestBaptismal = () => {
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
-
+      navigate('/client/certificates')
     } catch(err) {
       console.error(err)
     }

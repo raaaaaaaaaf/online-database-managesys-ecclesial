@@ -17,8 +17,8 @@ const adminConfig = [
     icon: icon('ic_user'),
   },
   {
-    title: 'product',
-    path: '/dashboard/products',
+    title: 'Certificates',
+    path: '/dashboard/certificates',
     icon: icon('ic_cart'),
   },
   {

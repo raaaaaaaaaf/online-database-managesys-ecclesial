@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { filter } from "lodash";
 import { sentenceCase } from "change-case";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 // @mui
 import {
   Card,
@@ -23,19 +23,32 @@ import {
   TablePagination,
 } from "@mui/material";
 // components
-import Label from "../../components/label";
-import Iconify from "../../components/iconify";
-import Scrollbar from "../../components/scrollbar";
+import Label from "../components/label";
+import Iconify from "../components/iconify";
+import Scrollbar from "../components/scrollbar";
 // sections
-import { UserListHead, UserListToolbar } from "../../sections/@dashboard/user";
+import { UserListHead, UserListToolbar } from "../sections/@dashboard/user";
 // mock
-import USERLIST from "../../_mock/user";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../firebase/firebaseConfig";
-import { AuthContext } from "../../context/AuthContext";
-import EditBaptismal from "../../components/modal/EditBaptismal";
-import EditMarriage from "../../components/modal/EditMarriage";
-import Loading from "../../components/loading/Loading";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
+import { AuthContext } from "../context/AuthContext";
+import EditBaptismal from "../components/modal/EditBaptismal";
+import EditMarriage from "../components/modal/EditMarriage";
+import Loading from "../components/loading/Loading";
+import Swal from "sweetalert2";
+import emailjs from "@emailjs/browser";
+import moment from "moment";
+import { useNavigate } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
@@ -81,7 +94,7 @@ function applySortFilter(array, comparator, query) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function CertificatesPage() {
+export default function AdminCertPage() {
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -110,18 +123,17 @@ export default function CertificatesPage() {
 
   const [dataMarriage, setDataMarriage] = useState(null);
 
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, userData } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = [];
-        const docsQuery = query(
-          collection(db, "data_certificates"),
-          where("uid", "==", currentUser.uid)
-        );
+        const docsQuery = query(collection(db, "data_certificates"));
         const docsSnap = await getDocs(docsQuery);
         docsSnap.forEach((doc) => {
           data.push({
@@ -129,6 +141,7 @@ export default function CertificatesPage() {
             ...doc.data(),
           });
         });
+
         setCertificates(data);
         setLoading(false);
       } catch (err) {
@@ -137,6 +150,78 @@ export default function CertificatesPage() {
     };
     fetchData();
   }, []);
+
+  const handleApproved = async (row) => {
+    try {
+      const result = await Swal.fire({
+        title: "Certificate Approval",
+        text: "Do you want to approve this certificate?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "Cancel",
+        customClass: {
+          confirmButton: "sweetalert-confirm-button",
+          cancelButton: "sweetalert-cancel-button",
+        },
+      });
+
+      if (result.isConfirmed) {
+        const docRef = collection(db, "data_notifications");
+        const certRef = doc(db, "data_certificates", row.id);
+        const notificationData = {
+          userName: row.userName,
+          recipientUserId: row.uid,
+          senderUserEmail: currentUser.email,
+          senderUserId: currentUser.uid,
+          displayName: userData.displayName,
+          type: "approved",
+          certificatesID: row.id,
+          timestamp: serverTimestamp(),
+          isRead: false,
+        };
+
+        const notificationDocRef = await addDoc(docRef, notificationData);
+        await updateDoc(certRef, {
+          notificationID: notificationDocRef.id,
+          isApproved: true,
+        });
+
+        // Handle approval logic here
+        Swal.fire("Approved!", "The certificate has been approved.", "success");
+        navigate('/dashboard/certificates')
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire(
+          "Cancelled",
+          "The certificate approval was cancelled.",
+          "error"
+        );
+      }
+    } catch (err) {
+      Swal.fire("Error", err, "error");
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async (id, row) => {
+    try {
+      await deleteDoc(doc(db, "data_certificates", id));
+      if (row.notificationID) {
+        await deleteDoc(doc(db, "data_notifications", row.notificationID));
+      }
+      console.log(row.notificationID);
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Certificate has been deleted.",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      navigate('/dashboard/certificates')
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleEditMarriage = (id, data) => {
     setIdMarriage(id);
@@ -327,11 +412,18 @@ export default function CertificatesPage() {
                                   <Iconify icon={"carbon:edit"} />
                                 </IconButton>
                               )}
-                              <IconButton size="small">
+                              <IconButton
+                                onClick={() => handleDelete(id, row)}
+                                size="small"
+                              >
                                 <Iconify icon={"carbon:delete"} />
                               </IconButton>
-                              <IconButton size="small" disabled={!isApproved}>
-                                <Iconify icon={"carbon:view"} />
+                              <IconButton
+                                onClick={() => handleApproved(row)}
+                                size="small"
+                                disabled={isApproved}
+                              >
+                                <Iconify icon={"ph:check-thin"} />
                               </IconButton>
                             </TableCell>
                           </TableRow>

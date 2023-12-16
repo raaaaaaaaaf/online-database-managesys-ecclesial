@@ -17,6 +17,8 @@ import Loading from './components/loading/Loading';
 import CertificatesPage from './pages/user/CertificatesPage';
 import RequestBaptismal from './pages/user/RequestBaptismal';
 import RequestMarriage from './pages/user/RequestMarriage';
+import AdminCertPage from './pages/AdminCertPage';
+import ViewBaptismal from './pages/user/ViewBaptismal';
 
 // ----------------------------------------------------------------------
 
@@ -81,6 +83,7 @@ export default function Router() {
         { path: 'user', element: <ProtectedRoute requiredRole="Admin"><UserPage /></ProtectedRoute> },
         { path: 'products', element: <ProtectedRoute requiredRole="Admin"><ProductsPage /></ProtectedRoute> },
         { path: 'blog', element: <ProtectedRoute requiredRole="Admin"><BlogPage /> </ProtectedRoute>},
+        { path: 'certificates', element: <ProtectedRoute requiredRole="Admin"><AdminCertPage /> </ProtectedRoute>},
       ],
     },
     {
@@ -92,6 +95,7 @@ export default function Router() {
         { path: 'baptismal', element: <ProtectedRoute ><RequestBaptismal /></ProtectedRoute> },
         { path: 'marriage', element: <ProtectedRoute ><RequestMarriage /></ProtectedRoute> },
         { path: 'certificates', element: <ProtectedRoute ><CertificatesPage /></ProtectedRoute> },
+        { path: 'certificates/baptismal/:id', element: <ProtectedRoute ><ViewBaptismal /></ProtectedRoute> },
       ]
     },
 

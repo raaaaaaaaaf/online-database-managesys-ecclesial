@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../../../firebase/firebaseConfig";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 // @mui
 import {
   Link,
@@ -71,6 +71,7 @@ export default function RegisterForm() {
   const signIn = async () => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(res.user)
       await updateProfile(res.user, {
         displayName: name,
       });
@@ -86,7 +87,7 @@ export default function RegisterForm() {
         role: "User",
       });
       setLoading(false)
-      toast.success("Successfully Registered", {
+      toast.success("Email verification link sent.", {
         position: "top-right",
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,

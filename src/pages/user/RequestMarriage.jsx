@@ -19,12 +19,13 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const RequestMarriage = () => {
   const [dobf, setDobf] = useState(null);
   const [dobm, setDobm] = useState(null);
   const [dom, setDom] = useState(null);
-  const { userData } = useContext(AuthContext)
+  const { currentUser, userData } = useContext(AuthContext)
   const [formData, setFormData] = useState({
     fullName: "",
     motherName: "",
@@ -35,6 +36,10 @@ const RequestMarriage = () => {
     fatherFName: "",
 
   });
+
+  const uid = currentUser.uid;
+
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -56,6 +61,26 @@ const RequestMarriage = () => {
 
   const handleAdd = async () => {
     try {
+      if(
+        !formData.fullName ||
+        !formData.fatherName ||
+        !formData.motherName ||
+
+        !formData.fullFName ||
+        !formData.fatherFName ||
+        !formData.motherFName ||
+        
+        !dobf ||
+        !dobm ||
+        !dom
+      ) {
+        toast.error("Please fill out all fields.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        });
+        return; // Exit the function if validation fails
+      }
       const docRef = collection(db, "data_certificates");
       const data = {
         fullName: formData.fullName,
@@ -73,6 +98,8 @@ const RequestMarriage = () => {
         isApproved: false,
         timeStamp: serverTimestamp(),
         userName: userData.displayName,
+        email: userData.email,
+        uid: uid,
       };
       await addDoc(docRef, data);
       toast.success("Requested Succesfully", {
@@ -80,6 +107,7 @@ const RequestMarriage = () => {
         autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
+      navigate('/client/certificates')
     } catch (err) {
       console.error(err);
     }
