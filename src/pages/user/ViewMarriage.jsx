@@ -89,10 +89,10 @@ const ViewMarriage = () => {
               justifyContent="center"
             >
               <Typography variant="h3" gutterBottom>
-                Immaculate Conception
+                Immaculate Conception Parish Church
               </Typography>
               <Typography variant="subtitle1" gutterBottom>
-                Parish Church
+                Dinagat Island
               </Typography>
             </Grid>
 

@@ -1,4 +1,5 @@
 // component
+import Iconify from '../../../components/iconify';
 import SvgColor from '../../../components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -7,35 +8,32 @@ const icon = (name) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ 
 
 const userConfig = [
   {
-    title: 'User Dash',
-    path: '/dashboard/app',
-    icon: icon('ic_analytics'),
+    title: 'Home',
+    path: '/client/userApp',
+    icon: <Iconify icon={'carbon:analytics'} />,
   },
+
   {
-    title: 'user',
-    path: '/dashboard/user',
-    icon: icon('ic_user'),
+    title: 'Events',
+    path: '/client/events',
+    icon: <Iconify icon={'clarity:event-line'} />,
   },
   {
     title: 'Request Baptismal',
     path: '/client/baptismal',
-    icon: icon('ic_cart'),
+    icon: <Iconify icon={'healthicons:i-certificate-paper-outline'} />,
   },
   {
     title: 'Request Marriage',
     path: '/client/marriage',
-    icon: icon('ic_cart'),
+    icon: <Iconify icon={'healthicons:i-certificate-paper-outline'} />,
   },
   {
     title: 'Certificates',
     path: '/client/certificates',
-    icon: icon('ic_cart'),
+    icon: <Iconify icon={'ph:certificate-thin'} />,
   },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic_disabled'),
-  },
+
 ];
 
 export default userConfig;

@@ -23,31 +23,31 @@ import {
   TablePagination,
 } from "@mui/material";
 // components
-import Label from "../components/label";
-import Iconify from "../components/iconify";
-import Scrollbar from "../components/scrollbar";
+
+import Iconify from "../../components/iconify";
+import Scrollbar from "../../components/scrollbar";
 // sections
-import { UserListHead, UserListToolbar } from "../sections/@dashboard/user";
+import { UserListHead, UserListToolbar } from "../../sections/@dashboard/user";
 // mock
-import USERLIST from "../_mock/user";
-import AddUser from "../components/modal/EditUser";
+
 import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
-import { fDate } from "../utils/formatTime";
-import Loading from "../components/loading/Loading";
-import EditUser from "../components/modal/EditUser";
+import { db } from "../../firebase/firebaseConfig";
+import Loading from "../../components/loading/Loading";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import AddEvent from "../../components/modal/AddEvent";
+import EditEvent from "../../components/modal/EditEvent";
+import RSVP from "../../components/modal/RSVP";
+import Attendance from "../../components/modal/Attendance";
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: "name", label: "Name", alignRight: false },
-  { id: "contact", label: "Contact No.", alignRight: false },
-  { id: "address", label: "Address", alignRight: false },
-  { id: "dob", label: "Date of Birth", alignRight: false },
-  { id: "age", label: "Age", alignRight: false },
-  { id: "cstatus", label: "Civil Status", alignRight: false },
-  { id: "action", label: "Action", alignRight: false },
+  { id: "name", label: "Event Name", alignRight: false },
+  { id: "amount", label: "Location", alignRight: false },
+  { id: "time", label: "Time", alignRight: false },
+  { id: "date", label: "Date", alignRight: false },
+  { id: "act", label: "Action", alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -78,14 +78,13 @@ function applySortFilter(array, comparator, query) {
   if (query) {
     return filter(
       array,
-      (_user) =>
-        _user.displayName.toLowerCase().indexOf(query.toLowerCase()) !== -1
+      (_user) => _user.eventName.toLowerCase().indexOf(query.toLowerCase()) !== -1
     );
   }
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function UserPage() {
+export default function UserEventPage() {
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -100,19 +99,27 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [members, setMembers] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+
+  const [regModal, setRegModal] = useState(false);
+
+  const [attenModal, setAttenModal] = useState(false);
+
+  const [formID, setFormID] = useState("");
+
+  const [regData, setRegData] = useState({});
+
+  const [eventList, setEventList] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const [modalData, setModalData] = useState()
-
-  const [modalID, setModalID] = useState()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = [];
-        const dataRef = query(collection(db, "users"));
+        const dataRef = query(collection(db, "data_events"));
         const dataSnap = await getDocs(dataRef);
         dataSnap.forEach((doc) => {
           data.push({
@@ -120,7 +127,7 @@ export default function UserPage() {
             ...doc.data(),
           });
         });
-        setMembers(data);
+        setEventList(data);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -129,19 +136,32 @@ export default function UserPage() {
     fetchData();
   }, []);
 
+  const handleRegister = (id, data) => {
+    setFormID(id);
+    setRegData(data);
+    setRegModal(true);
+  };
+
+  const handleAttend = (id) => {
+    setFormID(id);
+   
+    setAttenModal(true);
+  };
+
   const handleDelete = async (id) => {
     try {
-      const userRef = doc(db, "users", id)
-      await deleteDoc(userRef)
-      toast.success("Member Information has been deleted.", {
+      const dataRef = doc(db, "data_events", id);
+      await deleteDoc(dataRef);
+      toast.success("Deleted successfully", {
         position: "top-right",
-        autoClose: 3000, // Close the toast after 3 seconds
+        autoClose: 3000,
         hideProgressBar: false,
       });
-    } catch(err) {
+      navigate("/dashboard/event");
+    } catch (err) {
       console.error(err);
     }
-  }
+  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -151,7 +171,7 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = members.map((n) => n.displayName);
+      const newSelecteds = eventList.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
@@ -191,21 +211,20 @@ export default function UserPage() {
   };
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - members.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - eventList.length) : 0;
 
   const filteredUsers = applySortFilter(
-    members,
+    eventList,
     getComparator(order, orderBy),
     filterName
   );
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
-  console.log(modalData, modalID);
   return (
     <>
       <Helmet>
-        <title> User </title>
+        <title> Events </title>
       </Helmet>
 
       <Container>
@@ -216,9 +235,10 @@ export default function UserPage() {
           mb={5}
         >
           <Typography variant="h4" gutterBottom>
-            User
+            Events
           </Typography>
         </Stack>
+
         {loading ? (
           <Loading />
         ) : (
@@ -236,7 +256,7 @@ export default function UserPage() {
                     order={order}
                     orderBy={orderBy}
                     headLabel={TABLE_HEAD}
-                    rowCount={members.length}
+                    rowCount={eventList.length}
                     numSelected={selected.length}
                     onRequestSort={handleRequestSort}
                     onSelectAllClick={handleSelectAllClick}
@@ -250,15 +270,14 @@ export default function UserPage() {
                       .map((row, index) => {
                         const {
                           id,
-                          address,
-                          age,
-                          civilStatus,
-                          contact,
-                          displayName,
-                          dob,
-                          email,
+                          eventName,
+                          location,
+                          startDay,
+                          endDay,
+                          startTime,
+                          endTime,
                         } = row;
-                        const selectedUser = selected.indexOf(id) !== -1;
+                        const selectedUser = selected.indexOf(eventName) !== -1;
 
                         return (
                           <TableRow
@@ -271,10 +290,11 @@ export default function UserPage() {
                             <TableCell padding="checkbox">
                               <Checkbox
                                 checked={selectedUser}
-                                onChange={(event) => handleClick(event, id)}
+                                onChange={(event) =>
+                                  handleClick(event, memberName)
+                                }
                               />
                             </TableCell>
-
                             <TableCell
                               component="th"
                               scope="row"
@@ -285,42 +305,58 @@ export default function UserPage() {
                                 alignItems="center"
                                 spacing={2}
                               >
-                                <Avatar
-                                  alt={displayName}
-                                  src={`/assets/images/avatars/avatar_${
-                                    index + 1
-                                  }.jpg`}
-                                />
                                 <Typography variant="subtitle2" noWrap>
-                                  {displayName}
+                                  {eventName}
                                 </Typography>
                               </Stack>
                             </TableCell>
 
-                            <TableCell align="left">{contact}</TableCell>
-
-                            <TableCell align="left">{address}</TableCell>
+                            <TableCell align="left">{location}</TableCell>
 
                             <TableCell align="left">
-                              {new Date(dob.seconds * 1000).toLocaleDateString(
-                                "en-US"
-                              )}
+                              {new Date(
+                                startTime.seconds * 1000
+                              ).toLocaleTimeString("en-US")}{" "}
+                              -{" "}
+                              {new Date(
+                                endTime.seconds * 1000
+                              ).toLocaleTimeString("en-US")}
                             </TableCell>
 
-                            <TableCell align="left">{age}</TableCell>
-
-                            <TableCell align="left">{civilStatus}</TableCell>
                             <TableCell align="left">
-                              <IconButton onClick={() => {setOpen(true), setModalID(id), setModalData(row)}} size="large" color="inherit">
-                                <Iconify
-                                  icon={"material-symbols:edit-outline"}
-                                />
-                              </IconButton>
-                              <IconButton onClick={() => handleDelete(id)} size="large" color="inherit">
-                                <Iconify
-                                  icon={"material-symbols:delete-outline"}
-                                />
-                              </IconButton>
+                              {new Date(
+                                startDay.seconds * 1000
+                              ).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })}{" "}
+                              -{" "}
+                              {new Date(
+                                endDay.seconds * 1000
+                              ).toLocaleDateString("en-US", {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                            </TableCell>
+
+                            <TableCell align="left">
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleRegister(id, row)}
+                              >
+                                RSVP
+                              </Button>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                style={{ marginLeft: '8px' }}
+                                onClick={() => handleAttend(id)}
+                              >
+                                ATTENDANCE
+                              </Button>
                             </TableCell>
                           </TableRow>
                         );
@@ -358,14 +394,24 @@ export default function UserPage() {
                   )}
                 </Table>
               </TableContainer>
-
-              <EditUser open={open} onClose={()=> setOpen(false)} id={modalID}/>
+              <RSVP
+                open={regModal}
+                onClose={() => setRegModal(false)}
+                id={formID}
+                data={regData}
+              />
+              <Attendance
+                open={attenModal}
+                onClose={() => setAttenModal(false)}
+                id={formID}
+               
+              />
             </Scrollbar>
 
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={members.length}
+              count={eventList.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

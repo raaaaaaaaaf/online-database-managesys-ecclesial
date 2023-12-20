@@ -334,10 +334,12 @@ export default function CertificatesPage() {
 
                               <Link
                                 to={
-                                  docType === "Baptismal"
-                                    ? `baptismal/${id}`
-                                    : docType === "Marriage"
-                                    ? `marriage/${id}`
+                                  isApproved
+                                    ? docType === "Baptismal"
+                                      ? `baptismal/${id}`
+                                      : docType === "Marriage"
+                                      ? `marriage/${id}`
+                                      : ""
                                     : ""
                                 }
                                 style={{

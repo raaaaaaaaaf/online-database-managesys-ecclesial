@@ -297,7 +297,7 @@ export default function AdminCertPage() {
   return (
     <>
       <Helmet>
-        <title> User | Minimal UI </title>
+        <title> Certificates </title>
       </Helmet>
 
       <Container>

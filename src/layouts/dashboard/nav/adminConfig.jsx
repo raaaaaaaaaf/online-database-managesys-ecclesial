@@ -1,4 +1,5 @@
 // component
+import Iconify from '../../../components/iconify';
 import SvgColor from '../../../components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -7,34 +8,30 @@ const icon = (name) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} sx={{ 
 
 const adminConfig = [
   {
-    title: 'Admin Dash',
+    title: 'Home',
     path: '/dashboard/app',
-    icon: icon('ic_analytics'),
+    icon: <Iconify icon={'carbon:analytics'} />,
   },
   {
     title: 'user',
     path: '/dashboard/user',
-    icon: icon('ic_user'),
+    icon: <Iconify icon={'lucide:users-round'} />,
   },
   {
     title: 'Certificates',
     path: '/dashboard/certificates',
-    icon: icon('ic_cart'),
+    icon: <Iconify icon={'ph:certificate-thin'} />,
+  },
+
+  {
+    title: 'Event Monitoring',
+    path: '/dashboard/event',
+    icon: <Iconify icon={'clarity:event-line'} />,
   },
   {
-    title: 'blog',
-    path: '/dashboard/blog',
-    icon: icon('ic_blog'),
-  },
-  {
-    title: 'login',
-    path: '/login',
-    icon: icon('ic_lock'),
-  },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic_disabled'),
+    title: 'Tithes Monitoring',
+    path: '/dashboard/donation',
+    icon: <Iconify icon={'formkit:dollar'} />,
   },
 ];
 

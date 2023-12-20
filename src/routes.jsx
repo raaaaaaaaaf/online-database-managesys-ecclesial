@@ -12,7 +12,7 @@ import DashboardAppPage from './pages/DashboardAppPage';
 import RegisterPage from './pages/RegisterPage';
 import { useContext, useEffect, useState } from 'react';
 import { AuthContext } from './context/AuthContext';
-import UserDashboardAppPage from './pages/user/DashboardAppPage';
+
 import Loading from './components/loading/Loading';
 import CertificatesPage from './pages/user/CertificatesPage';
 import RequestBaptismal from './pages/user/RequestBaptismal';
@@ -20,6 +20,12 @@ import RequestMarriage from './pages/user/RequestMarriage';
 import AdminCertPage from './pages/AdminCertPage';
 import ViewBaptismal from './pages/user/ViewBaptismal';
 import ViewMarriage from './pages/user/ViewMarriage';
+import DonationPage from './pages/DonationPage';
+import EventPage from './pages/EventPage';
+import UserEventPage from './pages/user/UserEventPage';
+import RsvpPage from './pages/RsvpPage';
+import UserDashboardAppPage from './pages/user/UserDashboardAppPage';
+
 
 // ----------------------------------------------------------------------
 
@@ -84,6 +90,9 @@ export default function Router() {
         { path: 'user', element: <ProtectedRoute requiredRole="Admin"><UserPage /></ProtectedRoute> },
         { path: 'products', element: <ProtectedRoute requiredRole="Admin"><ProductsPage /></ProtectedRoute> },
         { path: 'blog', element: <ProtectedRoute requiredRole="Admin"><BlogPage /> </ProtectedRoute>},
+        { path: 'donation', element: <ProtectedRoute requiredRole="Admin"><DonationPage /> </ProtectedRoute>},
+        { path: 'event', element: <ProtectedRoute requiredRole="Admin"><EventPage /> </ProtectedRoute>},
+        { path: 'event/view/:id', element: <ProtectedRoute requiredRole="Admin"><RsvpPage /> </ProtectedRoute>},
         { path: 'certificates', element: <ProtectedRoute requiredRole="Admin"><AdminCertPage /> </ProtectedRoute>},
       ],
     },
@@ -93,6 +102,7 @@ export default function Router() {
       children: [
         { element: <ProtectedRoute ><Navigate to="/client/userApp" /></ProtectedRoute>, index: true },
         { path: 'userApp', element: <ProtectedRoute ><UserDashboardAppPage /></ProtectedRoute> },
+        { path: 'events', element: <ProtectedRoute ><UserEventPage /></ProtectedRoute> },
         { path: 'baptismal', element: <ProtectedRoute ><RequestBaptismal /></ProtectedRoute> },
         { path: 'marriage', element: <ProtectedRoute ><RequestMarriage /></ProtectedRoute> },
         { path: 'certificates', element: <ProtectedRoute ><CertificatesPage /></ProtectedRoute> },

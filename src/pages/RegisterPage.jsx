@@ -86,7 +86,7 @@ export default function RegisterPage() {
   return (
     <>
       <Helmet>
-        <title> Register | Birhen Del Carmen Online Parish Information System </title>
+        <title> Register</title>
       </Helmet>
 
       <StyledRoot>
@@ -101,7 +101,7 @@ export default function RegisterPage() {
         {mdUp && (
           <StyledSection>
             <Typography variant="h3" sx={{ px: 5, mt: 10, mb: 5 }}>
-            Birhen Del Carmen Online Parish Information System
+            Online Database Management System for Basic Ecclesial Community
             </Typography>
             <img src={bg} alt="login" />
           </StyledSection>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
         <Container maxWidth="sm">
           <StyledContent>
             <Typography variant="h4" gutterBottom>
-            Sign up to Birhen Del Carmen Online Parish Information System
+            Sign up to ODMSBEC
             </Typography>
 
             <Typography variant="body2" sx={{ mb: 5 }}>
