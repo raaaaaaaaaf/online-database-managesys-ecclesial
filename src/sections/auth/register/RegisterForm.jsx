@@ -70,6 +70,23 @@ export default function RegisterForm() {
 
   const signIn = async () => {
     try {
+      if (
+        !name || 
+        !email || 
+        !password ||
+        !contact ||
+        !address ||
+        !civilStatus ||
+        !dob
+        
+        ) {
+        toast.error("Please fill out all fields.", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+        });
+        return; // Exit the function if validation fails
+      }
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await sendEmailVerification(res.user)
       await updateProfile(res.user, {

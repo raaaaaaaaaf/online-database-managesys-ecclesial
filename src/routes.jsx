@@ -25,6 +25,7 @@ import EventPage from './pages/EventPage';
 import UserEventPage from './pages/user/UserEventPage';
 import RsvpPage from './pages/RsvpPage';
 import UserDashboardAppPage from './pages/user/UserDashboardAppPage';
+import MemberPage from './pages/MemberPage';
 
 
 // ----------------------------------------------------------------------
@@ -88,6 +89,7 @@ export default function Router() {
         { element: <ProtectedRoute requiredRole="Admin"><Navigate to="/dashboard/app" /></ProtectedRoute>, index: true },
         { path: 'app', element: <ProtectedRoute requiredRole="Admin"><DashboardAppPage /></ProtectedRoute> },
         { path: 'user', element: <ProtectedRoute requiredRole="Admin"><UserPage /></ProtectedRoute> },
+        { path: 'user/view/:id', element: <ProtectedRoute requiredRole="Admin"><MemberPage /></ProtectedRoute> },
         { path: 'products', element: <ProtectedRoute requiredRole="Admin"><ProductsPage /></ProtectedRoute> },
         { path: 'blog', element: <ProtectedRoute requiredRole="Admin"><BlogPage /> </ProtectedRoute>},
         { path: 'donation', element: <ProtectedRoute requiredRole="Admin"><DonationPage /> </ProtectedRoute>},

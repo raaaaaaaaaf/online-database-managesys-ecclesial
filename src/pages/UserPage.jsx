@@ -30,13 +30,16 @@ import Scrollbar from "../components/scrollbar";
 import { UserListHead, UserListToolbar } from "../sections/@dashboard/user";
 // mock
 import USERLIST from "../_mock/user";
-import AddUser from "../components/modal/EditUser";
-import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
+import AddUser from "../components/modal/EditMember";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 import { fDate } from "../utils/formatTime";
 import Loading from "../components/loading/Loading";
-import EditUser from "../components/modal/EditUser";
+import EditUser from "../components/modal/EditMember";
 import { toast } from "react-toastify";
+import AddMember from "../components/modal/AddMember";
+import EditMember from "../components/modal/EditMember";
+import { Link } from "react-router-dom";
 
 // ----------------------------------------------------------------------
 
@@ -47,6 +50,7 @@ const TABLE_HEAD = [
   { id: "dob", label: "Date of Birth", alignRight: false },
   { id: "age", label: "Age", alignRight: false },
   { id: "cstatus", label: "Civil Status", alignRight: false },
+  { id: "chapel", label: "Chapel", alignRight: false },
   { id: "action", label: "Action", alignRight: false },
 ];
 
@@ -79,7 +83,7 @@ function applySortFilter(array, comparator, query) {
     return filter(
       array,
       (_user) =>
-        _user.displayName.toLowerCase().indexOf(query.toLowerCase()) !== -1
+        _user.memberName.toLowerCase().indexOf(query.toLowerCase()) !== -1
     );
   }
   return stabilizedThis.map((el) => el[0]);
@@ -108,11 +112,13 @@ export default function UserPage() {
 
   const [modalID, setModalID] = useState()
 
+  const [openModal, setOpenModal] = useState(false)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = [];
-        const dataRef = query(collection(db, "users"));
+        const dataRef = query(collection(db, "data_members"));
         const dataSnap = await getDocs(dataRef);
         dataSnap.forEach((doc) => {
           data.push({
@@ -216,8 +222,16 @@ export default function UserPage() {
           mb={5}
         >
           <Typography variant="h4" gutterBottom>
-            User
+            Members
           </Typography>
+          <Button
+            onClick={() => setOpenModal(true)}
+            variant="contained"
+            startIcon={<Iconify icon="eva:plus-fill" />}
+          >
+            Members
+          </Button>
+          <AddMember open={openModal} onClose={() => setOpenModal(false)}/>
         </Stack>
         {loading ? (
           <Loading />
@@ -252,11 +266,11 @@ export default function UserPage() {
                           id,
                           address,
                           age,
-                          civilStatus,
-                          contact,
-                          displayName,
+                          cstatus,
+                          cp,
+                          memberName,
                           dob,
-                          email,
+                          chapel,
                         } = row;
                         const selectedUser = selected.indexOf(id) !== -1;
 
@@ -286,18 +300,18 @@ export default function UserPage() {
                                 spacing={2}
                               >
                                 <Avatar
-                                  alt={displayName}
+                                  alt={memberName}
                                   src={`/assets/images/avatars/avatar_${
                                     index + 1
                                   }.jpg`}
                                 />
                                 <Typography variant="subtitle2" noWrap>
-                                  {displayName}
+                                  {memberName}
                                 </Typography>
                               </Stack>
                             </TableCell>
 
-                            <TableCell align="left">{contact}</TableCell>
+                            <TableCell align="left">{cp}</TableCell>
 
                             <TableCell align="left">{address}</TableCell>
 
@@ -309,7 +323,11 @@ export default function UserPage() {
 
                             <TableCell align="left">{age}</TableCell>
 
-                            <TableCell align="left">{civilStatus}</TableCell>
+                            <TableCell align="left">{cstatus}</TableCell>
+
+                            <TableCell align="left">{chapel}</TableCell>
+
+
                             <TableCell align="left">
                               <IconButton onClick={() => {setOpen(true), setModalID(id), setModalData(row)}} size="large" color="inherit">
                                 <Iconify
@@ -321,6 +339,21 @@ export default function UserPage() {
                                   icon={"material-symbols:delete-outline"}
                                 />
                               </IconButton>
+                              
+                              <Link
+                                to={`view/${id}`}
+                                style={{
+                                  textDecoration: "none",
+                                  color: "black",
+                                }}
+                              >
+                              <IconButton size="large" color="inherit">
+                                <Iconify
+                                  icon={"carbon-view"}
+                                />
+                              </IconButton>
+                              </Link>
+
                             </TableCell>
                           </TableRow>
                         );
@@ -359,7 +392,7 @@ export default function UserPage() {
                 </Table>
               </TableContainer>
 
-              <EditUser open={open} onClose={()=> setOpen(false)} id={modalID}/>
+              <EditMember open={open} onClose={()=> setOpen(false)} id={modalID}/>
             </Scrollbar>
 
             <TablePagination

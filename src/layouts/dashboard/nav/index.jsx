@@ -86,7 +86,7 @@ export default function Nav({ openNav, onCloseNav }) {
                     variant="subtitle2"
                     sx={{ color: "text.primary" }}
                   >
-                    {userData.displayName}
+                    {currentUser.displayName}
                   </Typography>
                   {currentUser.emailVerified ? (
                     <Typography

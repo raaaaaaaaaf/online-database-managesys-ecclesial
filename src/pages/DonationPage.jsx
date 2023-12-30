@@ -175,14 +175,14 @@ const DonationPage = () => {
               <AppWidgetSummary
                 title="Monthly Record"
                 total={`₱${fCurrency(month)}`}
-                icon={"ant-design:android-filled"}
+                icon={"formkit:dollar"}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
               <AppWidgetSummary
                 title="Yearly Record"
                 total={`₱${fCurrency(year)}`}
-                icon={"ant-design:android-filled"}
+                icon={"formkit:dollar"}
               />
             </Grid>
 
