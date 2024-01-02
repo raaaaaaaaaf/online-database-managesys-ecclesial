@@ -13,7 +13,7 @@ const adminConfig = [
     icon: <Iconify icon={'carbon:analytics'} />,
   },
   {
-    title: 'user',
+    title: 'Members',
     path: '/dashboard/user',
     icon: <Iconify icon={'lucide:users-round'} />,
   },

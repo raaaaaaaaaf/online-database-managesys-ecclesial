@@ -78,7 +78,7 @@ const ViewMarriage = () => {
             mb={5}
           >
             <img
-              src="/assets/logo1.png"
+              src="/assets/logo.png"
               alt="logo"
               style={{ width: "150px", height: "150px" }}
             />
@@ -97,7 +97,7 @@ const ViewMarriage = () => {
             </Grid>
 
             <img
-              src="/assets/logo.png"
+              src="/assets/logo2.png"
               alt="logo"
               style={{ width: "150px", height: "150px" }}
             />

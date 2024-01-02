@@ -445,6 +445,7 @@ const AddMember = ({ open, onClose }) => {
             <TextField
               id="cp"
               name="cp"
+              type="number"
               value={formData.cp}
               onChange={handleInputChange}
               label="Contact No."

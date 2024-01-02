@@ -29,7 +29,7 @@ const Logo = forwardRef(({ disabledLink = false, sx, ...other }, ref) => {
   const logo = (
     <Box
       component="img"
-      src="/assets/logo.png" 
+      src="/assets/logo2.png" 
       sx={{ width: 40, height: 40, cursor: 'pointer', ...sx }}
     />
   );
