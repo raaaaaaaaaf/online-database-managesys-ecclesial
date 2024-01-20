@@ -20,12 +20,14 @@ import RequestMarriage from './pages/user/RequestMarriage';
 import AdminCertPage from './pages/AdminCertPage';
 import ViewBaptismal from './pages/user/ViewBaptismal';
 import ViewMarriage from './pages/user/ViewMarriage';
-import DonationPage from './pages/DonationPage';
 import EventPage from './pages/EventPage';
 import UserEventPage from './pages/user/UserEventPage';
 import RsvpPage from './pages/RsvpPage';
 import UserDashboardAppPage from './pages/user/UserDashboardAppPage';
 import MemberPage from './pages/MemberPage';
+import ChapelListPage from './pages/ChapelListPage';
+import MemberListPage from './pages/MemberListPage';
+import ReportPage from './pages/ReportPage';
 
 
 // ----------------------------------------------------------------------
@@ -88,11 +90,10 @@ export default function Router() {
       children: [
         { element: <ProtectedRoute requiredRole="Admin"><Navigate to="/dashboard/app" /></ProtectedRoute>, index: true },
         { path: 'app', element: <ProtectedRoute requiredRole="Admin"><DashboardAppPage /></ProtectedRoute> },
-        { path: 'user', element: <ProtectedRoute requiredRole="Admin"><UserPage /></ProtectedRoute> },
-        { path: 'user/view/:id', element: <ProtectedRoute requiredRole="Admin"><MemberPage /></ProtectedRoute> },
-        { path: 'products', element: <ProtectedRoute requiredRole="Admin"><ProductsPage /></ProtectedRoute> },
+        { path: 'chapel', element: <ProtectedRoute requiredRole="Admin"><ChapelListPage /></ProtectedRoute> },
+        { path: 'chapel/view/:id', element: <ProtectedRoute requiredRole="Admin"><MemberListPage /></ProtectedRoute> },
+        { path: 'report', element: <ProtectedRoute requiredRole="Admin"><ReportPage /></ProtectedRoute> },
         { path: 'blog', element: <ProtectedRoute requiredRole="Admin"><BlogPage /> </ProtectedRoute>},
-        { path: 'donation', element: <ProtectedRoute requiredRole="Admin"><DonationPage /> </ProtectedRoute>},
         { path: 'event', element: <ProtectedRoute requiredRole="Admin"><EventPage /> </ProtectedRoute>},
         { path: 'event/view/:id', element: <ProtectedRoute requiredRole="Admin"><RsvpPage /> </ProtectedRoute>},
         { path: 'certificates', element: <ProtectedRoute requiredRole="Admin"><AdminCertPage /> </ProtectedRoute>},

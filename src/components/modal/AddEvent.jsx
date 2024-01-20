@@ -93,18 +93,36 @@ const AddEvent = ({ open, onClose }) => {
         return; // Exit the function if validation fails
       }
       const dataRef = collection(db, "data_events");
+      const notificationRef = collection(db, "data_notifications");
+
+      
+      const notificationData = {
+        userName: "",
+        recipientUserId: "",
+        senderUserEmail: currentUser.email,
+        senderUserId: currentUser.uid,
+        displayName: currentUser.displayName,
+        type: "request",
+        role: "Admin",
+        docType: docType,
+        message: "Has requested a certificate",
+        timestamp: serverTimestamp(),
+        isRead: false,
+      };
+
+      const notificationDocRef = await addDoc(notificationRef, notificationData);
+
       const data = {
         eventName: formData.event,
         location: formData.location,
-
         startDay: date.start.toDate(),
         endDay: date.end.toDate(),
         startTime: time.start.toDate(),
         endTime: time.end.toDate(),
-        
-
+        eventNotificationID: notificationDocRef.id,
         timeStamp: serverTimestamp(),
       };
+
       await addDoc(dataRef, data);
       toast.success("Successfully added", {
         position: "top-right",

@@ -30,23 +30,34 @@ import Scrollbar from "../components/scrollbar";
 import { UserListHead, UserListToolbar } from "../sections/@dashboard/user";
 // mock
 import USERLIST from "../_mock/user";
-import { collection, deleteDoc, doc, getDocs, query } from "firebase/firestore";
+import AddUser from "../components/modal/EditMember";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
+import { fDate } from "../utils/formatTime";
 import Loading from "../components/loading/Loading";
-import { fCurrency } from "../utils/formatNumber";
-import { Link, useNavigate } from "react-router-dom";
+import EditUser from "../components/modal/EditMember";
 import { toast } from "react-toastify";
-import AddEvent from "../components/modal/AddEvent";
-import EditEvent from "../components/modal/EditEvent";
+import AddMember from "../components/modal/AddMember";
+import EditMember from "../components/modal/EditMember";
+import { Link } from "react-router-dom";
+import AddChapel from "../components/modal/AddChapel";
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: "name", label: "Event Name", alignRight: false },
-  { id: "amount", label: "Location", alignRight: false },
-  { id: "time", label: "Time", alignRight: false },
-  { id: "date", label: "Date", alignRight: false },
-  { id: "act", label: "Action", alignRight: false },
+  { id: "name", label: "Chapel", alignRight: false },
+  { id: "address", label: "Address", alignRight: false },
+  { id: "baptismal", label: "Baptismal", alignRight: false },
+  { id: "marriage", label: "Marriage", alignRight: false },
+  { id: "member", label: "Total Members", alignRight: false },
+  { id: "action", label: "Action", alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -83,7 +94,7 @@ function applySortFilter(array, comparator, query) {
   return stabilizedThis.map((el) => el[0]);
 }
 
-export default function EventPage() {
+export default function ChapelListPage() {
   const [open, setOpen] = useState(null);
 
   const [page, setPage] = useState(0);
@@ -98,25 +109,21 @@ export default function EventPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [openModal, setOpenModal] = useState(false);
-
-  const [editModal, setEditModal] = useState(false);
-
-  const [formID, setFormID] = useState("");
-
-  const [editData, setEditData] = useState({});
-
-  const [eventList, setEventList] = useState([]);
+  const [members, setMembers] = useState([]);
 
   const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate();
+  const [modalData, setModalData] = useState();
+
+  const [modalID, setModalID] = useState();
+
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = [];
-        const dataRef = query(collection(db, "data_events"));
+        const dataRef = query(collection(db, "data_chapel"));
         const dataSnap = await getDocs(dataRef);
         dataSnap.forEach((doc) => {
           data.push({
@@ -124,7 +131,7 @@ export default function EventPage() {
             ...doc.data(),
           });
         });
-        setEventList(data);
+        setMembers(data);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -133,22 +140,15 @@ export default function EventPage() {
     fetchData();
   }, []);
 
-  const handleEditModal = (id, data) => {
-    setFormID(id);
-    setEditData(data);
-    setEditModal(true);
-  };
-
   const handleDelete = async (id) => {
     try {
-      const dataRef = doc(db, "data_events", id);
-      await deleteDoc(dataRef);
-      toast.success("Deleted successfully", {
+      const userRef = doc(db, "users", id);
+      await deleteDoc(userRef);
+      toast.success("Member Information has been deleted.", {
         position: "top-right",
-        autoClose: 3000,
+        autoClose: 3000, // Close the toast after 3 seconds
         hideProgressBar: false,
       });
-      navigate("/dashboard/event");
     } catch (err) {
       console.error(err);
     }
@@ -162,7 +162,7 @@ export default function EventPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = eventList.map((n) => n.name);
+      const newSelecteds = members.map((n) => n.displayName);
       setSelected(newSelecteds);
       return;
     }
@@ -202,20 +202,21 @@ export default function EventPage() {
   };
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - eventList.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - members.length) : 0;
 
   const filteredUsers = applySortFilter(
-    eventList,
+    members,
     getComparator(order, orderBy),
     filterName
   );
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
+  console.log(modalData, modalID);
   return (
     <>
       <Helmet>
-        <title> Event Monitoring </title>
+        <title> Chapel </title>
       </Helmet>
 
       <Container>
@@ -226,18 +227,17 @@ export default function EventPage() {
           mb={5}
         >
           <Typography variant="h4" gutterBottom>
-            Events
+            Chapel List
           </Typography>
           <Button
             onClick={() => setOpenModal(true)}
             variant="contained"
             startIcon={<Iconify icon="eva:plus-fill" />}
           >
-            Event
+            Add Chapel
           </Button>
-          <AddEvent open={openModal} onClose={() => setOpenModal(false)} />
+          <AddChapel open={openModal} onClose={() => setOpenModal(false)} />
         </Stack>
-
         {loading ? (
           <Loading />
         ) : (
@@ -255,7 +255,7 @@ export default function EventPage() {
                     order={order}
                     orderBy={orderBy}
                     headLabel={TABLE_HEAD}
-                    rowCount={eventList.length}
+                    rowCount={members.length}
                     numSelected={selected.length}
                     onRequestSort={handleRequestSort}
                     onSelectAllClick={handleSelectAllClick}
@@ -269,14 +269,13 @@ export default function EventPage() {
                       .map((row, index) => {
                         const {
                           id,
-                          eventName,
-                          location,
-                          startDay,
-                          endDay,
-                          startTime,
-                          endTime,
+                          address,
+                          name,
+                          baptismal,
+                          marriage,
+                          members,
                         } = row;
-                        const selectedUser = selected.indexOf(eventName) !== -1;
+                        const selectedUser = selected.indexOf(id) !== -1;
 
                         return (
                           <TableRow
@@ -289,81 +288,31 @@ export default function EventPage() {
                             <TableCell padding="checkbox">
                               <Checkbox
                                 checked={selectedUser}
-                                onChange={(event) =>
-                                  handleClick(event, memberName)
-                                }
+                                onChange={(event) => handleClick(event, id)}
                               />
                             </TableCell>
-                            <TableCell
-                              component="th"
-                              scope="row"
-                              padding="none"
-                            >
-                              <Stack
-                                direction="row"
-                                alignItems="center"
-                                spacing={2}
-                              >
-                                <Typography variant="subtitle2" noWrap>
-                                  {eventName}
-                                </Typography>
-                              </Stack>
-                            </TableCell>
 
-                            <TableCell align="left">{location}</TableCell>
+                            <TableCell align="left">{name}</TableCell>
+
+                            <TableCell align="left">{address}</TableCell>
+
+                            <TableCell align="left">{baptismal}</TableCell>
+
+                            <TableCell align="left">{marriage}</TableCell>
+
+                            <TableCell align="left">{members.length}</TableCell>
 
                             <TableCell align="left">
-                              {new Date(
-                                startTime.seconds * 1000
-                              ).toLocaleTimeString("en-US")}{" "}
-                              -{" "}
-                              {new Date(
-                                endTime.seconds * 1000
-                              ).toLocaleTimeString("en-US")}
-                            </TableCell>
-
-                            <TableCell align="left">
-                              {new Date(
-                                startDay.seconds * 1000
-                              ).toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              })}{" "}
-                              -{" "}
-                              {new Date(
-                                endDay.seconds * 1000
-                              ).toLocaleDateString("en-US", {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              })}
-                            </TableCell>
-
-                            <TableCell align="left">
-                              <IconButton
-                                onClick={() => handleEditModal(id, row)}
-                              >
-                                <Iconify
-                                  icon={"material-symbols:edit-outline"}
-                                />
-                              </IconButton>
-                              <IconButton onClick={() => handleDelete(id)}>
-                                <Iconify
-                                  icon={"material-symbols:delete-outline"}
-                                />
-                              </IconButton>
-
                               <Link
                                 to={`view/${id}`}
                                 style={{
                                   textDecoration: "none",
-                                  color: "white",
+                                  color: "black",
                                 }}
                               >
-                                <IconButton>
+                                <Button variant="contained" size="large" color="inherit">
                                   <Iconify icon={"carbon-view"} />
-                                </IconButton>
+                                </Button>
                               </Link>
                             </TableCell>
                           </TableRow>
@@ -402,18 +351,18 @@ export default function EventPage() {
                   )}
                 </Table>
               </TableContainer>
-              <EditEvent
-                open={editModal}
-                onClose={() => setEditModal(false)}
-                id={formID}
-                data={editData}
+
+              <EditMember
+                open={open}
+                onClose={() => setOpen(false)}
+                id={modalID}
               />
             </Scrollbar>
 
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
-              count={eventList.length}
+              count={members.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

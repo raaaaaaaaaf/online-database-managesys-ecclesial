@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async";
 // @mui
 import { styled } from "@mui/material/styles";
-import { Container, Typography, Divider, Stack, Button } from "@mui/material";
+import { Container, Typography, Divider, Stack, Button, Link } from "@mui/material";
 // hooks
 import useResponsive from "../hooks/useResponsive";
 // components
@@ -14,8 +14,9 @@ import { auth, provider, db } from "../firebase/firebaseConfig";
 import { useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
 import bg from "../assets/church.png";
+import { useState } from "react";
+import AddMember from "../components/modal/AddMember";
 
 // ----------------------------------------------------------------------
 
@@ -49,6 +50,7 @@ const StyledContent = styled("div")(({ theme }) => ({
 
 export default function LoginPage() {
   const mdUp = useResponsive("up", "md");
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -82,11 +84,12 @@ export default function LoginPage() {
             </Typography>
 
             <Typography variant="body2" sx={{ mb: 5 }}>
-              Don’t have an account? {""}
-              <Link variant="subtitle2" to={"/register"}>
+              Are you a new member? {""}
+              <Link onClick={() => setOpen(true)} variant="subtitle2">
                 Sign-up
               </Link>
             </Typography>
+            <AddMember open={open} onClose={() => setOpen(false)}/>
 
             <LoginForm />
           </StyledContent>

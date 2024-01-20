@@ -34,6 +34,10 @@ export default function UserDashboardAppPage() {
   const [certCount, setCertCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const [approvedCert, setApprovedCert] = useState(0);
+
+  const [pendingCert, setPendingCert] = useState(0);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,6 +45,17 @@ export default function UserDashboardAppPage() {
         const docData = [];
         const reqDoc = query(
           collection(db, "data_certificates"),
+          where("uid", "==", user.uid)
+        );
+        const approvedDocs = query(
+          collection(db, "data_certificates"),
+          where("isApproved", "==", true),
+          where("uid", "==", user.uid)
+        );
+
+        const pendingDocs = query(
+          collection(db, "data_certificates"),
+          where("isApproved", "==", null),
           where("uid", "==", user.uid)
         );
         const reqSnap = await getDocs(reqDoc);
@@ -53,10 +68,15 @@ export default function UserDashboardAppPage() {
 
         const eventRef = query(collection(db, "data_events"));
         const eventSnap = await getDocs(eventRef);
+        const approvedSnap = await getDocs(approvedDocs);
+
+        const pedningSnap = await getDocs(pendingDocs);
 
         setEventCount(eventSnap.docs.length);
         setCertData(docData);
         setCertCount(reqSnap.docs.length);
+        setApprovedCert(approvedSnap.docs.length);
+        setPendingCert(pedningSnap.docs.length);
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -87,19 +107,34 @@ export default function UserDashboardAppPage() {
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid item xs={12} sm={6} md={3}>
+              <AppWidgetSummary
+                title="Events"
+                total={eventCount}
+                icon={"ant-design:apple-filled"}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
               <AppWidgetSummary
                 title="Requested Certificates"
-                total={`${fShortenNumber(certCount)}`}
-                icon={"ant-design:android-filled"}
+                total={certCount}
+                icon={"fluent:document-error-20-regular"}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={6}>
+            <Grid item xs={12} sm={6} md={3}>
               <AppWidgetSummary
-                title="Events"
-                total={`${fShortenNumber(eventCount)}`}
-                icon={"ant-design:apple-filled"}
+                title="Approved Certificate"
+                total={approvedCert}
+                icon={"carbon:task-approved"}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <AppWidgetSummary
+                title="Pending Certificate"
+                total={pendingCert}
+                icon={"ic:baseline-pending-actions"}
               />
             </Grid>
 

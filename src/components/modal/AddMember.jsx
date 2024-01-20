@@ -19,69 +19,83 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import {
   addDoc,
+  arrayUnion,
   collection,
+  doc,
   getDocs,
   query,
   serverTimestamp,
+  setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { db } from "../../firebase/firebaseConfig";
+import { auth, db } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import Iconify from "../iconify";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 const AddMember = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
-    nname: "",
-    religion: "",
+    lname: "",
+    fname: "",
+    mname: "",
     address: "",
-    cp: "",
+    birthplace: "",
+    trabaho: "",
+    income: "",
     edu: "",
     course: "",
-    income: "",
-    caddress: "",
-    work: "",
-    asawa: "",
-    work1: "",
-    nchild: "",
-    achild: "",
+    //father
+    fatherlname: "",
+    fatherfname: "",
+    fathermname: "",
+
+    //mother
+    motherlname: "",
+    motherfname: "",
+    mothermname: "",
+
+    //husband/wife
+    name2: "",
+    place: "",
   });
-  const [member, setMember] = useState("");
 
   const [baptized, setBaptized] = useState("");
 
   const [confirmation, setConfirmation] = useState("");
 
-  const [house, setHouse] = useState("");
-
-  const [renting, setRenting] = useState("");
-
-  const [nakikitira, setNakikitira] = useState("");
+  const [marriage, setMarriage] = useState(null);
 
   const [cstatus, setCstatus] = useState("");
 
-  const [chapel, setChapel] = useState("");
-
-  const [members, setMembers] = useState([]);
-
-  const [loading, setLoading] = useState(true);
+  const [dom, setDom] = useState(null);
 
   const [dob, setDob] = useState(null);
+
+  const [dob2, setDob2] = useState(null);
 
   const [age, setAge] = useState("");
 
   const [children, setChildren] = useState([
     {
-      name: "",
-      age: "",
-      work: "",
-      baptized: "",
-      kumpisal: "",
-      inSchool: "",
-      schoolLevel: "",
+      lname: "",
+      fname: "",
+      mname: "",
     },
   ]);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [chapelList, setChapelList] = useState([]);
+
+  const [chapel, setChapel] = useState("");
+
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -89,10 +103,7 @@ const AddMember = ({ open, onClose }) => {
     const fetchData = async () => {
       try {
         const data = [];
-        const dataRef = query(
-          collection(db, "users"),
-          where("role", "==", "User")
-        );
+        const dataRef = query(collection(db, "data_chapel"));
         const dataSnap = await getDocs(dataRef);
         dataSnap.forEach((doc) => {
           data.push({
@@ -100,8 +111,7 @@ const AddMember = ({ open, onClose }) => {
             ...doc.data(),
           });
         });
-        setMembers(data);
-        setLoading(false);
+        setChapelList(data);
       } catch (err) {
         console.error(err);
       }
@@ -109,9 +119,14 @@ const AddMember = ({ open, onClose }) => {
     fetchData();
   }, []);
 
-  const handleChange = (event) => {
-    setMember(event.target.value);
-  };
+  // Combine first name, middle name, and last name into displayName
+  const fullName = `${formData.fname} ${formData.mname} ${formData.lname}`;
+
+  // Combine first name, middle name, and last name into displayName
+  const fatherFullName = `${formData.fatherfname} ${formData.fathermname} ${formData.fatherlname}`;
+
+  // Combine first name, middle name, and last name into displayName
+  const motherFullName = `${formData.motherfname} ${formData.mothermname} ${formData.motherlname}`;
 
   const handleBChange = (event) => {
     setBaptized(event.target.value);
@@ -121,23 +136,15 @@ const AddMember = ({ open, onClose }) => {
     setConfirmation(event.target.value);
   };
 
-  const handleHChange = (event) => {
-    setHouse(event.target.value);
-  };
-
-  const handleRChange = (event) => {
-    setRenting(event.target.value);
-  };
-
-  const handleNChange = (event) => {
-    setNakikitira(event.target.value);
-  };
-
   const handleCStatusChange = (event) => {
     setCstatus(event.target.value);
   };
 
-  const handleChapelChange = (event) => {
+  const handleMChange = (event) => {
+    setMarriage(event.target.value);
+  };
+
+  const handleCHapelChange = (event) => {
     setChapel(event.target.value);
   };
 
@@ -165,13 +172,9 @@ const AddMember = ({ open, onClose }) => {
     setChildren([
       ...children,
       {
-        name: "",
-        age: "",
-        work: "",
-        baptized: "",
-        kumpisal: "",
-        inSchool: "",
-        schoolLevel: "",
+        lname: "",
+        fname: "",
+        mname: "",
       },
     ]);
   };
@@ -206,32 +209,37 @@ const AddMember = ({ open, onClose }) => {
     }
   };
 
+  const handleDob2Change = (date) => {
+    setDob2(date);
+  };
+
+  const handleDomChange = (date) => {
+    setDom(date);
+  };
+
   const handleAdd = async () => {
     try {
       if (
-        !formData.nname ||
-        !formData.religion ||
+        !formData.lname ||
+        !formData.fname ||
+        !formData.mname ||
         !formData.address ||
-        !formData.cp ||
+        !formData.birthplace ||
+        !formData.trabaho ||
+        !formData.income ||
         !formData.edu ||
         !formData.course ||
-        !formData.income ||
-        !formData.caddress ||
-        !formData.work ||
-        !formData.asawa ||
-        !formData.work1 ||
-        !formData.nchild ||
-        !formData.achild ||
+        !formData.fatherlname ||
+        !formData.fatherfname ||
+        !formData.fathermname ||
+        !formData.motherlname ||
+        !formData.motherfname ||
+        !formData.mothermname ||
         !dob ||
-        !member ||
         !baptized ||
         !confirmation ||
-        !house ||
-        !renting ||
-        !nakikitira ||
         !cstatus ||
-        !children ||
-        !chapel
+        !marriage
       ) {
         toast.error("Please fill out all fields.", {
           position: "top-right",
@@ -240,128 +248,155 @@ const AddMember = ({ open, onClose }) => {
         });
         return; // Exit the function if validation fails
       }
-
-      const dataRef = collection(db, "data_members");
-      const data = {
-        memberName: member,
-        nickName: formData.nname,
-        religion: formData.religion,
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(res.user, {
+        displayName: fullName,
+      });
+      const dataRef = doc(db, "data_chapel", chapel);
+      const memberData = {
+        fullName: fullName,
+        fatherFullName: fatherFullName,
+        motherFullName: motherFullName,
         address: formData.address,
-        cp: formData.cp,
-        edu: formData.edu,
+        birthplace: formData.birthplace,
+        trabaho: formData.trabaho,
         course: formData.course,
         income: formData.income,
-        caddress: formData.caddress,
-        work: formData.work,
-        asawa: formData.asawa,
-        work1: formData.work1,
-        numberChild: formData.nchild,
-        aliveChild: formData.achild,
-        dob: dob.toDate(),
+        edu: formData.edu,
+        name2: formData.name2,
+        placeofmarriage: formData.place,
+        birthDate: dob.toDate(),
+        birthDate2: dob2.toDate(),
+        dateofmarriage: dom.toDate(),
         age: age,
         baptized: baptized,
         confirmation: confirmation,
-        house: house,
-        renting: renting,
-        nakikitira: nakikitira,
+        marriage: marriage,
         cstatus: cstatus,
         children: children,
-        chapel: chapel,
-
-        timeStamp: serverTimestamp(),
       };
-      await addDoc(dataRef, data);
-      toast.success("Successfully added", {
+      const arrayField = "members";
+
+      // Use arrayUnion to add memberData to the array
+      const updateObject = {
+        [arrayField]: arrayUnion(memberData),
+      };
+
+      await updateDoc(dataRef, updateObject);
+      await setDoc(doc(db, "users", res.user.uid), {
+        uid: res.user.uid,
+        displayName: fullName,
+        email: email,
+        password: password,
+        role: "User",
+
+        fatherFullName: fatherFullName,
+        motherFullName: motherFullName,
+        address: formData.address,
+        birthplace: formData.birthplace,
+        trabaho: formData.trabaho,
+        course: formData.course,
+        income: formData.income,
+        edu: formData.edu,
+        name2: formData.name2,
+        placeofmarriage: formData.place,
+        birthDate: dob.toDate(),
+        birthDate2: dob2.toDate(),
+        dateofmarriage: dom.toDate(),
+        age: age,
+        baptized: baptized,
+        confirmation: confirmation,
+        marriage: marriage,
+        cstatus: cstatus,
+        children: children,
+        chapelID: chapel
+      });
+
+      toast.success("Successfully registered!", {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
       });
-      navigate("/dashboard/user");
-    } catch (err) {
-      toast.error(err.message, {
+      navigate("/client/userApp");
+    } catch (error) {
+      let customErrorMessage = "An error occurred.";
+
+      // Check the error code and customize the message accordingly
+      if (error.code === "auth/invalid-email") {
+        customErrorMessage = "Invalid email address. Please check your email.";
+      } else if (error.code === "auth/user-not-found") {
+        customErrorMessage = "User not found. Please sign up or try again.";
+      } // Add more conditions for other Firebase error codes if needed
+      toast.error(customErrorMessage, {
         position: "top-right",
         autoClose: 3000,
         hideProgressBar: false,
       });
-      console.error(err);
+      console.error(error);
     }
   };
 
   return (
-    <Dialog maxWidth={"lg"} open={open} onClose={onClose}>
-      <DialogTitle>Members</DialogTitle>
+    <Dialog maxWidth={"md"} open={open} onClose={onClose}>
+      <DialogTitle style={{ textAlign: "center" }}>
+        SIGN-UP MEMBER SURVEY FORM
+      </DialogTitle>
       <DialogContent>
         <Grid container spacing={1}>
           {/* Right Column */}
           <Grid item xs={4}>
-            <FormControl sx={{ width: "100%" }}>
-              <InputLabel id="demo-simple-select-label">Select User</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={member}
-                label="Age"
-                onChange={handleChange}
-              >
-                {members.map((memberItem) => (
-                  <MenuItem key={memberItem.id} value={memberItem.displayName}>
-                    {memberItem.displayName}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={4}>
             <TextField
-              
-              id="nname"
-              name="nname"
-              value={formData.nname}
+              id="lname"
+              name="lname"
+              value={formData.lname}
               onChange={handleInputChange}
-              label="Nickname"
-              placeholder="Nickname"
+              label="Last Name"
+              placeholder="Last Name"
               fullWidth
               variant="outlined"
             />
           </Grid>
 
-          
           <Grid item xs={4}>
-          <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Chapel</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={chapel}
-                label="Chapel"
-                onChange={handleChapelChange}
-              >
-                <MenuItem value={"Bagumbayan Chapel"}>Bagumbayan Chapel</MenuItem>
-                <MenuItem value={"Cab-ilan Chapel"}>Cab-ilan Chapel</MenuItem>
-                <MenuItem value={"Cabayawan Chapel"}>Cabayawan Chapel</MenuItem>
-                <MenuItem value={"Cayetano Chapel"}>Cayetano Chapel</MenuItem>
-                <MenuItem value={"Cuarenta Chapel"}>Cuarenta Chapel</MenuItem>
-                <MenuItem value={"Escolta Chapel"}>Escolta Chapel</MenuItem>
-                <MenuItem value={"Gomez Chapel"}>Gomez Chapel</MenuItem>
-                <MenuItem value={"Justiniana Edera Chapel"}>Justiniana Edera Chapel</MenuItem>
-                <MenuItem value={"Luna Chapel"}>Luna Chapel</MenuItem>
-                <MenuItem value={"Magsaysay Chapel"}>Magsaysay Chapel</MenuItem>
-                <MenuItem value={"Mauswagon Chapel"}>Mauswagon Chapel</MenuItem>
-                <MenuItem value={"Matingbe Chapel"}>Matingbe Chapel</MenuItem>
-                <MenuItem value={"New Mabuhay Chapel"}>New Mabuhay Chapel</MenuItem>
-                <MenuItem value={"Sitio Ecleo Chapel"}>Sitio Ecleo Chapel</MenuItem>
-                <MenuItem value={"Sta. Cruz Chapel"}>Sta. Cruz Chapel</MenuItem>
-                <MenuItem value={"Tagbuyakhaw Chapel"}>Tagbuyakhaw Chapel</MenuItem>
-                <MenuItem value={"Wadas Chapel"}>Wadas Chapel</MenuItem>
-                <MenuItem value={"White Beach Chapel"}>White Beach Chapel</MenuItem>
-                <MenuItem value={"Wilson Chapel"}>Wilson Chapel</MenuItem>
-                
-              </Select>
-            </FormControl>
+            <TextField
+              id="fname"
+              name="fname"
+              value={formData.fname}
+              onChange={handleInputChange}
+              label="First Name"
+              placeholder="First Name"
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <TextField
+              id="mname"
+              name="mname"
+              value={formData.mname}
+              onChange={handleInputChange}
+              label="Middle Name"
+              placeholder="Middle Name"
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <TextField
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              label="Address"
+              placeholder="Birth Place"
+              fullWidth
+              variant="outlined"
+            />
           </Grid>
           {/* Left Column */}
-          <Grid item xs={6}>
+          <Grid item xs={3}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 sx={{ width: "100%" }}
@@ -372,7 +407,7 @@ const AddMember = ({ open, onClose }) => {
               />
             </LocalizationProvider>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={1}>
             <TextField
               id="age"
               name="age"
@@ -382,22 +417,24 @@ const AddMember = ({ open, onClose }) => {
               fullWidth
             />
           </Grid>
-
           <Grid item xs={4}>
             <TextField
-              id="religion"
-              name="religion"
-              value={formData.religion}
+              id="birthplace"
+              name="birthplace"
+              value={formData.birthplace}
               onChange={handleInputChange}
-              label="Religion"
-              placeholder="Religion"
+              label="Birth Place"
+              placeholder="Birth Place"
               fullWidth
               variant="outlined"
             />
           </Grid>
+
           <Grid item xs={4}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Baptized?</InputLabel>
+              <InputLabel id="demo-simple-select-label">
+                Nakompirmahan?
+              </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -410,11 +447,10 @@ const AddMember = ({ open, onClose }) => {
               </Select>
             </FormControl>
           </Grid>
+
           <Grid item xs={4}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">
-                Confirmation?
-              </InputLabel>
+              <InputLabel id="demo-simple-select-label">Nabinyagan?</InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -428,82 +464,95 @@ const AddMember = ({ open, onClose }) => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={4}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Nakasalan?</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={marriage}
+                label="Age"
+                onChange={handleMChange}
+              >
+                <MenuItem value={"Yes"}>Yes</MenuItem>
+                <MenuItem value={"No"}>No</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={4}>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Chapel</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={chapel}
+                label="Age"
+                onChange={handleCHapelChange}
+              >
+                {chapelList.map((chapel) => (
+                  <MenuItem key={chapel.id} value={chapel.id}>
+                    {chapel.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={4}>
             <TextField
-              id="address"
-              name="address"
-              value={formData.address}
+              id="trabaho"
+              name="trabaho"
+              value={formData.trabaho}
               onChange={handleInputChange}
-              label="Address"
-              placeholder="Address"
+              label="Trabaho"
+              placeholder="Trabaho"
               fullWidth
               variant="outlined"
             />
           </Grid>
 
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <TextField
-              id="cp"
-              name="cp"
+              id="income"
+              name="income"
+              value={formData.income}
+              onChange={handleInputChange}
+              label="Monthly Income"
+              placeholder="Monthly Income"
+              fullWidth
               type="number"
-              value={formData.cp}
-              onChange={handleInputChange}
-              label="Contact No."
-              placeholder="XXXX XXXX XXXX"
-              fullWidth
               variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">₱</InputAdornment>
+                ),
+              }}
             />
           </Grid>
 
           <Grid item xs={4}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Own House?</InputLabel>
+              <InputLabel id="demo-simple-select-label">
+                Civil Status
+              </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={house}
-                label="Age"
-                onChange={handleHChange}
+                value={cstatus}
+                label="Civil Status"
+                onChange={handleCStatusChange}
               >
-                <MenuItem value={"Yes"}>Yes</MenuItem>
-                <MenuItem value={"No"}>No</MenuItem>
+                <MenuItem value={"Single"}>Single</MenuItem>
+                <MenuItem value={"Married"}>Married</MenuItem>
+                <MenuItem value={"Divorced"}>Divorced</MenuItem>
+                <MenuItem value={"Widowed"}>Widowed</MenuItem>
+                <MenuItem value={"Separated"}>Separated</MenuItem>
               </Select>
             </FormControl>
           </Grid>
 
           <Grid item xs={4}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Renting?</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={renting}
-                label="Age"
-                onChange={handleRChange}
-              >
-                <MenuItem value={"Yes"}>Yes</MenuItem>
-                <MenuItem value={"No"}>No</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={4}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Nakikitira?</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={nakikitira}
-                label="Age"
-                onChange={handleNChange}
-              >
-                <MenuItem value={"Yes"}>Yes</MenuItem>
-                <MenuItem value={"No"}>No</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={6}>
             <TextField
               id="edu"
               name="edu"
@@ -515,7 +564,7 @@ const AddMember = ({ open, onClose }) => {
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={4}>
             <TextField
               id="course"
               name="course"
@@ -528,255 +577,266 @@ const AddMember = ({ open, onClose }) => {
             />
           </Grid>
 
-          <Grid item xs={4}>
-            <TextField
-              id="income"
-              name="income"
-              value={formData.income}
-              onChange={handleInputChange}
-              label="Income in a week"
-              placeholder=""
-              fullWidth
-              variant="outlined"
-            />
+          <Grid item xs={12} style={{ marginTop: "5px", marginBottom: "5px" }}>
+            <Divider>FATHER</Divider>
           </Grid>
+
           <Grid item xs={4}>
             <TextField
-              id="caddress"
-              name="caddress"
-              value={formData.caddress}
+              id="fatherlname"
+              name="fatherlname"
+              value={formData.fatherlname}
               onChange={handleInputChange}
-              label="Company Address"
-              placeholder=""
-              fullWidth
-              variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              id="work"
-              name="work"
-              value={formData.work}
-              onChange={handleInputChange}
-              label="Other Knowledge Work"
-              placeholder=""
+              label="Last Name"
+              placeholder="Last Name"
               fullWidth
               variant="outlined"
             />
           </Grid>
 
-          <Grid item xs={2}>
-            <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">
-                Civil Status
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={cstatus}
-                label="Civil Status"
-                onChange={handleCStatusChange}
-              >
-                <MenuItem value={"Binata/Dalaga"}>Binata/Dalaga</MenuItem>
-                <MenuItem value={"May Asawa"}>May Asawa</MenuItem>
-                <MenuItem value={"Hiwalay sa Asawa"}>Hiwalay sa Asawa</MenuItem>
-                <MenuItem value={"Balo"}>Balo</MenuItem>
-                <MenuItem value={"Kasal sa simbahang Katoliko"}>
-                  Kasal sa simbahang Katoliko
-                </MenuItem>
-                <MenuItem value={"Kasal sa ibang relihiyon"}>
-                  Kasal sa ibang relihiyon
-                </MenuItem>
-                <MenuItem value={"Kasal sa Sibil"}>Kasal sa Sibil</MenuItem>
-                <MenuItem value={"Nagsama ng di-kasal"}>
-                  Nagsama ng di-kasal
-                </MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
           <Grid item xs={4}>
             <TextField
-              id="asawa"
-              name="asawa"
-              value={formData.asawa}
+              id="fatherfname"
+              name="fatherfname"
+              value={formData.fatherfname}
               onChange={handleInputChange}
-              label="Husband/Wife Name"
-              placeholder=""
-              fullWidth
-              variant="outlined"
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <TextField
-              id="work1"
-              name="work1"
-              value={formData.work1}
-              onChange={handleInputChange}
-              label="Husband/Wife Work"
-              placeholder=""
+              label="First Name"
+              placeholder="First Name"
               fullWidth
               variant="outlined"
             />
           </Grid>
 
-          <Grid item xs={2}>
+          <Grid item xs={4}>
             <TextField
-              type="number"
-              id="nchild"
-              name="nchild"
-              value={formData.nchild}
+              id="fathermname"
+              name="fathermname"
+              value={formData.fathermname}
               onChange={handleInputChange}
-              label="Number of Children(All included)"
-              placeholder=""
+              label="Middle Name"
+              placeholder="Middle Name"
               fullWidth
               variant="outlined"
             />
           </Grid>
-          <Grid item xs={2}>
+
+          <Grid item xs={12} style={{ marginTop: "5px", marginBottom: "5px" }}>
+            <Divider>MOTHER</Divider>
+          </Grid>
+
+          <Grid item xs={4}>
             <TextField
-              type="number"
-              id="achild"
-              name="achild"
-              value={formData.achild}
+              id="motherlname"
+              name="motherlname"
+              value={formData.motherlname}
               onChange={handleInputChange}
-              label="How many are alive"
-              placeholder=""
+              label="Last Name"
+              placeholder="Last Name"
               fullWidth
               variant="outlined"
             />
           </Grid>
+
+          <Grid item xs={4}>
+            <TextField
+              id="motherfname"
+              name="motherfname"
+              value={formData.motherfname}
+              onChange={handleInputChange}
+              label="First Name"
+              placeholder="First Name"
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item xs={4}>
+            <TextField
+              id="mothermname"
+              name="mothermname"
+              value={formData.mothermname}
+              onChange={handleInputChange}
+              label="Middle Name"
+              placeholder="Middle Name"
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+
           <Grid
             item
             xs={12}
             style={{ marginTop: "10px", marginBottom: "10px" }}
           >
-            <Divider>CHILDREN</Divider>
+            {marriage === "Yes" && <Divider>If Married</Divider>}
           </Grid>
 
-          {children.map((record, index) => (
-            <Grid
-              container
-              spacing={1}
-              key={index}
-              style={{ marginLeft: "1px", marginBottom: "10px" }}
-            >
+          {marriage === "Yes" && (
+            <>
               <Grid item xs={3}>
                 <TextField
-                  name={`name${index}`}
-                  label="Children Name"
-                  variant="outlined"
+                  id="name2"
+                  name="name2"
+                  value={formData.name2}
+                  onChange={handleInputChange}
+                  label="Husband/Wife Name"
+                  placeholder="Full Name"
                   fullWidth
-                  value={record.name}
-                  onChange={(e) => handleAddChild(e, index, "name")}
-                />
-              </Grid>
-              <Grid item xs={1}>
-                <TextField
-                  name={`age${index}`}
-                  type="number"
-                  label="Age"
                   variant="outlined"
-                  fullWidth
-                  value={record.age}
-                  onChange={(e) => handleAddChild(e, index, "age")}
-                />
-              </Grid>
-              <Grid item xs={2}>
-                <TextField
-                  name={`work${index}`}
-                  label="Work"
-                  variant="outlined"
-                  fullWidth
-                  value={record.work}
-                  onChange={(e) => handleAddChild(e, index, "work")}
                 />
               </Grid>
 
-              <Grid item xs={1}>
-                <FormControl fullWidth>
-                  <InputLabel id={`baptized-label-${index}`}>
-                    Nabinyagan?
-                  </InputLabel>
-                  <Select
-                    labelId={`baptized-label-${index}`}
-                    id={`baptized-select-${index}`}
-                    label="Age"
-                    value={record.baptized}
-                    onChange={(e) => handleSelectChange(e, index, "baptized")}
-                  >
-                    <MenuItem value={"Yes"}>Yes</MenuItem>
-                    <MenuItem value={"No"}>No</MenuItem>
-                  </Select>
-                </FormControl>
+              <Grid item xs={3}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    sx={{ width: "100%" }}
+                    label="Date of Birth"
+                    value={dob2}
+                    onChange={handleDob2Change}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
               </Grid>
 
-              <Grid item xs={1}>
-                <FormControl fullWidth>
-                  <InputLabel id={`kumpisal-label-${index}`}>
-                    Nakumpisalan
-                  </InputLabel>
-                  <Select
-                    labelId={`kumpisal-label-${index}`}
-                    id={`kumpisal-select-${index}`}
-                    label="Nakumpisalan"
-                    value={record.kumpisal}
-                    onChange={(e) => handleSelectChange(e, index, "kumpisal")}
-                  >
-                    <MenuItem value={"Yes"}>Yes</MenuItem>
-                    <MenuItem value={"No"}>No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={1}>
-                <FormControl fullWidth>
-                  <InputLabel id={`inSchool-label-${index}`}>
-                    Nag-aaral
-                  </InputLabel>
-                  <Select
-                    labelId={`inSchool-label-${index}`}
-                    id={`inSchool-select-${index}`}
-                    label="Nag-aaral"
-                    value={record.inSchool}
-                    onChange={(e) => handleSelectChange(e, index, "inSchool")}
-                  >
-                    <MenuItem value={"Yes"}>Yes</MenuItem>
-                    <MenuItem value={"No"}>No</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
               <Grid item xs={3}>
                 <TextField
-                  name={`schoolLevel${index}`}
-                  label="Kursong Pinag-aralan/Natapos"
-                  variant="outlined"
+                  id="place"
+                  name="place"
+                  value={formData.place}
+                  onChange={handleInputChange}
+                  label="Place of Marriage"
                   fullWidth
-                  value={record.schoolLevel}
-                  onChange={(e) => handleAddChild(e, index, "schoolLevel")}
-                  InputProps={
-                    children.length > 1
-                      ? {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() => handleDeleteChild(index)}
-                                style={{ color: "red" }}
-                              >
-                                <Iconify icon="material-symbols-light:delete-outline" />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }
-                      : {}
-                  }
+                  variant="outlined"
                 />
               </Grid>
+
+              <Grid item xs={3}>
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    sx={{ width: "100%" }}
+                    label="Date of Marriage"
+                    value={dom}
+                    onChange={handleDomChange}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+              </Grid>
+            </>
+          )}
+          <Grid
+            item
+            xs={12}
+            style={{ marginTop: "10px", marginBottom: "10px" }}
+          >
+            {marriage === "Yes" && <Divider>Children</Divider>}
+          </Grid>
+          {marriage === "Yes" &&
+            children.map((record, index) => (
+              <Grid
+                container
+                spacing={1}
+                key={index}
+                style={{
+                  marginLeft: "1px",
+                  marginBottom: "5px",
+                  marginTop: "5px",
+                }}
+              >
+                <Grid item xs={4}>
+                  <TextField
+                    name={`lname${index}`}
+                    label="Last Name"
+                    variant="outlined"
+                    fullWidth
+                    value={record.lname}
+                    onChange={(e) => handleAddChild(e, index, "lname")}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    name={`fname${index}`}
+                    label="First Name"
+                    variant="outlined"
+                    fullWidth
+                    value={record.fname}
+                    onChange={(e) => handleAddChild(e, index, "fname")}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    name={`mname${index}`}
+                    label="Middle Name"
+                    variant="outlined"
+                    fullWidth
+                    value={record.mname}
+                    onChange={(e) => handleAddChild(e, index, "mname")}
+                    InputProps={
+                      children.length > 1
+                        ? {
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() => handleDeleteChild(index)}
+                                  style={{ color: "red" }}
+                                >
+                                  <Iconify icon="material-symbols-light:delete-outline" />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }
+                        : {}
+                    }
+                  />
+                </Grid>
+              </Grid>
+            ))}
+          {marriage === "Yes" && (
+            <Grid item xs={12}>
+              <Divider>
+                <Button onClick={addChild}>Add Another Child</Button>
+              </Divider>
             </Grid>
-          ))}
-          <Grid item xs={12}>
-            <Divider>
-              <Button onClick={addChild}>Add Another Child</Button>
-            </Divider>
+          )}
+
+          <Grid item xs={12} style={{ marginBottom: "5px" }}>
+            <Divider>Account Information</Divider>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TextField
+              name="email"
+              label="Email address"
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              variant="outlined"
+            />
+          </Grid>
+
+          <Grid item xs={6}>
+            <TextField
+              name="password"
+              label="Password"
+              onChange={(e) => setPassword(e.target.value)}
+              type={showPassword ? "text" : "password"}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      <Iconify
+                        icon={
+                          showPassword ? "eva:eye-fill" : "eva:eye-off-fill"
+                        }
+                      />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
           </Grid>
         </Grid>
       </DialogContent>

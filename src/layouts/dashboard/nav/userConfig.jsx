@@ -12,27 +12,17 @@ const userConfig = [
     path: '/client/userApp',
     icon: <Iconify icon={'carbon:analytics'} />,
   },
-
   {
-    title: 'Events',
-    path: '/client/events',
-    icon: <Iconify icon={'clarity:event-line'} />,
-  },
-  {
-    title: 'Request Baptismal',
-    path: '/client/baptismal',
-    icon: <Iconify icon={'healthicons:i-certificate-paper-outline'} />,
-  },
-  {
-    title: 'Request Marriage',
-    path: '/client/marriage',
-    icon: <Iconify icon={'healthicons:i-certificate-paper-outline'} />,
-  },
-  {
-    title: 'Certificates',
+    title: 'Request Certificates',
     path: '/client/certificates',
     icon: <Iconify icon={'ph:certificate-thin'} />,
   },
+  {
+    title: 'View Events',
+    path: '/client/events',
+    icon: <Iconify icon={'clarity:event-line'} />,
+  },
+
 
 ];
 

@@ -37,6 +37,7 @@ import EditBaptismal from "../../components/modal/EditBaptismal";
 import EditMarriage from "../../components/modal/EditMarriage";
 import Loading from "../../components/loading/Loading";
 import { Link } from "react-router-dom";
+import RequestCert from "../../components/modal/RequestCert";
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ function applySortFilter(array, comparator, query) {
 }
 
 export default function CertificatesPage() {
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState(false);
 
   const [page, setPage] = useState(0);
 
@@ -223,8 +224,16 @@ export default function CertificatesPage() {
           mb={5}
         >
           <Typography variant="h4" gutterBottom>
-            Requested Documents
+            Requested Certificate
           </Typography>
+          <Button
+            onClick={() => setOpen(true)}
+            variant="contained"
+            startIcon={<Iconify icon="eva:plus-fill" />}
+          >
+            Request Certificate
+          </Button>
+          <RequestCert open={open} onClose={() => setOpen(false)} />
         </Stack>
 
         {loading ? (
@@ -306,8 +315,20 @@ export default function CertificatesPage() {
                             </TableCell>
 
                             <TableCell align="left">
-                              <Label color={isApproved ? "success" : "error"}>
-                                {isApproved ? "Approved" : "Pending"}
+                              <Label
+                                color={
+                                  isApproved
+                                    ? "success"
+                                    : isApproved === false
+                                    ? "error"
+                                    : "warning"
+                                }
+                              >
+                                {isApproved
+                                  ? "Approved"
+                                  : isApproved === false
+                                  ? "Rejected"
+                                  : "Pending"}
                               </Label>
                             </TableCell>
 

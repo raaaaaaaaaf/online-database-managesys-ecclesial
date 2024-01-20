@@ -143,7 +143,7 @@ const ViewBaptismal = () => {
                 >
                   Date of Baptism:{" "}
                   <span style={{ textDecoration: "underline" }}>
-                    {new Date(data.pob.seconds * 1000).toLocaleDateString(
+                    {new Date(data.birthDate.seconds * 1000).toLocaleDateString(
                       "en-US",
                       {
                         year: "numeric",
@@ -162,7 +162,7 @@ const ViewBaptismal = () => {
                 >
                   Date of Birth:{" "}
                   <span style={{ textDecoration: "underline" }}>
-                    {new Date(data.dob.seconds * 1000).toLocaleDateString(
+                    {new Date(data.birthDate.seconds * 1000).toLocaleDateString(
                       "en-US",
                       {
                         year: "numeric",
@@ -181,7 +181,7 @@ const ViewBaptismal = () => {
                 >
                   Place of Birth:{" "}
                   <span style={{ textDecoration: "underline" }}>
-                    {data.placeofbirth}
+                    {data.birthplace}
                   </span>
                 </Typography>
               </Grid>
@@ -219,32 +219,7 @@ const ViewBaptismal = () => {
                   </span>
                 </Typography>
               </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  style={{ margin: "5px", fontWeight: "bold" }}
-                >
-                  Sponsors:  &nbsp;
-                  {data.sponsors.map((item, index) => (
-                    <span key={index} style={{ textDecoration: "underline" }}>
-                      {item.name}, &nbsp;
-                    </span>
-                  ))}
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  style={{ marginTop: "20px", fontWeight: "bold" }}
-                >
-                  Officiant:{" "}
-                  <span style={{ textDecoration: "underline" }}>
-                    {data.rev}
-                  </span>
-                </Typography>
-              </Grid>
+
 
               <Grid item xs={12}>
                 <Typography
@@ -267,26 +242,6 @@ const ViewBaptismal = () => {
                       { month: "long" }
                     )}
                   </span>
-                </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  style={{ marginTop: "40px", marginRight: "50px", textAlign: "right" }}
-                >
-                  <span
-                    style={{ fontWeight: "bold", textDecoration: "underline" }}
-                  >
-                    {data.rev}
-                  </span>
-                </Typography>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  style={{  marginRight: "90px",textAlign: "right" }}
-                >
-                    BISHOP
                 </Typography>
               </Grid>
             </Grid>

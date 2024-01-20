@@ -126,29 +126,29 @@ const ViewMarriage = () => {
             </Typography>
             <Typography variant="subtitle1" gutterBottom>
               <span style={{ textDecoration: "underline" }}>
-                {data.gfullName}
+                {data.fullName}
               </span>{" "}
               &nbsp; and &nbsp;{" "}
               <span style={{ textDecoration: "underline" }}>
-                {data.bfullName}
+                {data.fullName2}
               </span>
             </Typography>
             <Typography variant="subtitle1" gutterBottom>
               Were Wed on the &nbsp;
               <span style={{ textDecoration: "underline" }}>
-                {new Date(data.dom.seconds * 1000).toLocaleDateString("en-US", {
+                {new Date(data.dateofmarriage.seconds * 1000).toLocaleDateString("en-US", {
                   day: "numeric",
                 })}
               </span>{" "}
               &nbsp; Day of &nbsp;{" "}
               <span style={{ textDecoration: "underline" }}>
-                {new Date(data.dom.seconds * 1000).toLocaleDateString("en-US", {
+                {new Date(data.dateofmarriage.seconds * 1000).toLocaleDateString("en-US", {
                   month: "long",
                 })}
               </span>
               &nbsp; In the year &nbsp;
               <span style={{ textDecoration: "underline" }}>
-                {new Date(data.dom.seconds * 1000).toLocaleDateString("en-US", {
+                {new Date(data.dateofmarriage.seconds * 1000).toLocaleDateString("en-US", {
                   year: "numeric",
                 })}
               </span>
@@ -169,7 +169,7 @@ const ViewMarriage = () => {
                   <span
                     style={{ fontWeight: "bold", textDecoration: "underline" }}
                   >
-                    {data.gfullName}
+                    {data.fullName}
                   </span>
                 </Typography>
                 <Typography
@@ -191,7 +191,7 @@ const ViewMarriage = () => {
                   <span
                     style={{ fontWeight: "bold", textDecoration: "underline" }}
                   >
-                    {data.bfullName}
+                    {data.fullName2}
                   </span>
                 </Typography>
                 <Typography

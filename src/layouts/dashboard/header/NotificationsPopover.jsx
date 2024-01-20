@@ -97,7 +97,7 @@ export default function NotificationsPopover() {
 
   const [totalNotification, setTotalNotification] = useState(0);
 
-  const { currentUser } = useContext(AuthContext);
+  const { userData } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -263,14 +263,14 @@ function NotificationItem({ notification }) {
   };
 
   return (
-    <Link
-      to={
-        notification.docType === "Baptismal"
-          ? `certificates/baptismal/${notification.certificatesID}`
-          : notification.docType === "Marriage"
-          ? `certificates/marriage/${notification.certificatesID}`
-          : ""
-      }
+    <Link to={'certificates'}
+      // to={
+      //   notification.type === "Baptismal"
+      //     ? `certificates/baptismal/${notification.certificatesID}`
+      //     : notification.docType === "Marriage"
+      //     ? `certificates/marriage/${notification.certificatesID}`
+      //     : ""
+      // }
       style={{ textDecoration: "none", color: "black" }}
     >
       <ListItemButton
@@ -318,27 +318,44 @@ function NotificationItem({ notification }) {
 
 // ----------------------------------------------------------------------
 
+
 function renderContent(notification) {
   const title = (
     <Typography variant="subtitle2">
-      {notification.displayName}:
-      <Typography
-        component="span"
-        variant="body2"
-        sx={{ color: "text.secondary" }}
-      >
-        &nbsp; {noCase("Your Certificate has been approved.")}
+      {notification.displayName}
+      <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+        &nbsp; {noCase(notification.message)}
       </Typography>
     </Typography>
   );
 
+  if (notification.type === 'approved') {
+    return {
+      avatar: <img alt={notification.displayName} src="/assets/approved.png" />,
+      title,
+    };
+  }
+  if (notification.type === 'rejected') {
+    return {
+      avatar: <img alt={notification.displayName} src="/assets/rejected.png" />,
+      title,
+    };
+  }
+  if (notification.type === 'request') {
+    return {
+      avatar: <img alt={notification.displayName} src="/assets/request.png" />,
+      title,
+    };
+  }
+  if (notification.type === 'event') {
+    return {
+      avatar: <img alt={notification.displayName} src="/assets/event.png" />,
+      title,
+    };
+  }
+
   return {
-    avatar: (
-      <img
-        alt={notification.displayName}
-        src="/assets/icons/ic_notification_mail.svg"
-      />
-    ),
+    avatar: notification.avatar ? <img alt={notification.displayName} src={notification.avatar} /> : null,
     title,
   };
 }

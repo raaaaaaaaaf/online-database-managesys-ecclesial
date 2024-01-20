@@ -167,7 +167,7 @@ export default function AdminCertPage() {
       });
 
       if (result.isConfirmed) {
-        const docRef = collection(db, "data_notifications");
+        const docRef = collection(db, "data_notifications")
         const certRef = doc(db, "data_certificates", row.id);
         const notificationData = {
           userName: row.userName,
@@ -175,7 +175,9 @@ export default function AdminCertPage() {
           senderUserEmail: currentUser.email,
           senderUserId: currentUser.uid,
           displayName: userData.displayName,
+          message: "Your Certificate has been approved.",
           type: "approved",
+          role: "User",
           certificatesID: row.id,
           docType: row.docType,
           timestamp: serverTimestamp(),
@@ -184,13 +186,13 @@ export default function AdminCertPage() {
 
         const notificationDocRef = await addDoc(docRef, notificationData);
         await updateDoc(certRef, {
-          notificationID: notificationDocRef.id,
+          userNotificationID: notificationDocRef.id,
           isApproved: true,
         });
 
         // Handle approval logic here
         Swal.fire("Approved!", "The certificate has been approved.", "success");
-        navigate('/dashboard/certificates')
+        navigate("/dashboard/certificates");
       } else if (result.dismiss === Swal.DismissReason.cancel) {
         Swal.fire(
           "Cancelled",
@@ -204,22 +206,59 @@ export default function AdminCertPage() {
     }
   };
 
-  const handleDelete = async (id, row) => {
+  const handleReject = async (row) => {
     try {
-      await deleteDoc(doc(db, "data_certificates", id));
-      if (row.notificationID) {
-        await deleteDoc(doc(db, "data_notifications", row.notificationID));
-      }
-      console.log(row.notificationID);
-      Swal.fire({
-        position: "top-end",
-        icon: "success",
-        title: "Certificate has been deleted.",
-        showConfirmButton: false,
-        timer: 1500,
+      const result = await Swal.fire({
+        title: "Reject Certificate",
+        text: "Input Remarks:",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Reject",
+        cancelButtonText: "No",
+        input: "text",
+        customClass: {
+          cancelButton: "sweetalert-cancel-button",
+          confirmButton: "sweetalert-confirm-button",
+        },
       });
-      navigate('/dashboard/certificates')
+
+      if (result.isConfirmed) {
+        const inputValue = "Your Certificate has been rejected." + result.value;
+        const docRef = collection(db, "data_notifications");
+        const certRef = doc(db, "data_certificates", row.id);
+        const notificationData = {
+          userName: row.userName,
+          recipientUserId: row.uid,
+          senderUserEmail: currentUser.email,
+          senderUserId: currentUser.uid,
+          displayName: userData.displayName,
+          message: inputValue,
+          type: "rejected",
+          role: "User",
+          certificatesID: row.id,
+          docType: row.docType,
+          timestamp: serverTimestamp(),
+          isRead: false,
+        };
+
+        const notificationDocRef = await addDoc(docRef, notificationData);
+        await updateDoc(certRef, {
+          userNotificationID: notificationDocRef.id,
+          isApproved: false,
+        });
+
+        // Handle approval logic here
+        Swal.fire("Rejected!", "warning");
+        navigate("/dashboard/certificates");
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire(
+          "Cancelled",
+          "The certificate rejection was cancelled.",
+          "error"
+        );
+      }
     } catch (err) {
+      Swal.fire("Error", err, "error");
       console.error(err);
     }
   };
@@ -341,8 +380,14 @@ export default function AdminCertPage() {
                         page * rowsPerPage + rowsPerPage
                       )
                       .map((row, index) => {
-                        const { id, userName, isApproved, docType, timeStamp } =
-                          row;
+                        const {
+                          id,
+                          userName,
+                          isApproved,
+                          isRejected,
+                          docType,
+                          timeStamp,
+                        } = row;
                         const selectedUser = selected.indexOf(name) !== -1;
 
                         return (
@@ -391,30 +436,26 @@ export default function AdminCertPage() {
                             </TableCell>
 
                             <TableCell align="left">
-                              <Label color={isApproved ? "success" : "error"}>
-                                {isApproved ? "Approved" : "Pending"}
+                              <Label
+                                color={
+                                  isApproved
+                                    ? "success"
+                                    : isApproved === false
+                                    ? "error"
+                                    : "warning"
+                                }
+                              >
+                                {isApproved
+                                  ? "Approved"
+                                  : isApproved === false
+                                  ? "Rejected"
+                                  : "Pending"}
                               </Label>
                             </TableCell>
 
                             <TableCell align="left">
-                              {docType === "Marriage" && (
-                                <IconButton
-                                  onClick={() => handleEditMarriage(id, row)}
-                                  size="small"
-                                >
-                                  <Iconify icon={"carbon:edit"} />
-                                </IconButton>
-                              )}
-                              {docType === "Baptismal" && (
-                                <IconButton
-                                  onClick={() => handleEditBaptismal(id, row)}
-                                  size="small"
-                                >
-                                  <Iconify icon={"carbon:edit"} />
-                                </IconButton>
-                              )}
                               <IconButton
-                                onClick={() => handleDelete(id, row)}
+                                onClick={() => handleReject(row)}
                                 size="small"
                               >
                                 <Iconify icon={"carbon:delete"} />

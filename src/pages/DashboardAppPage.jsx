@@ -27,25 +27,50 @@ import Loading from "../components/loading/Loading";
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
-  const [userCount, setUserCount] = useState(0);
   const [eventCount, setEventCount] = useState(0);
-  const [monthly, setMonthly] = useState(0);
   const [certData, setCertData] = useState([]);
+
+  const [totalCert, setTotalCert] = useState(0)
+  
+  const [approvedCert, setApprovedCert] = useState(0)
+
+  const [pendingCert, setPendingCert] = useState(0)
+
   const [eventData, setEventData] = useState([]);
+  
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const docData = [];
-        const reqDoc = query(collection(db, "data_certificates"));
-        const reqSnap = await getDocs(reqDoc);
-        reqSnap.forEach((doc) => {
-          docData.push({
+        const totalData = [];
+
+        const totalDoc = query(collection(db, "data_certificates"));
+
+        const approvedDocs = query(
+          collection(db, "data_certificates"),
+          where("isApproved", "==", true)
+        );
+
+        const pendingDocs = query(
+          collection(db, "data_certificates"),
+          where("isApproved", "==", null)
+        );
+
+        const totalSnap = await getDocs(totalDoc);
+
+        const approvedSnap = await getDocs(approvedDocs);
+
+        const pedningSnap = await getDocs(pendingDocs);
+
+        totalSnap.forEach((doc) => {
+          totalData.push({
             id: doc.id,
             ...doc.data(),
           });
         });
+
+
 
         const eventData = [];
         const eventRef = query(collection(db, "data_events"));
@@ -60,36 +85,12 @@ export default function DashboardAppPage() {
         const userRef = query(collection(db, "users"));
         const userSnap = await getDocs(userRef);
 
-        const today = new Date();
-        const firstDayOfMonth = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          1
-        );
-        const lastDayOfMonth = new Date(
-          today.getFullYear(),
-          today.getMonth() + 1,
-          0
-        );
-
-        const monthRef = query(
-          collection(db, "data_donations"),
-          where("timeStamp", ">", firstDayOfMonth),
-          where("timeStamp", "<=", lastDayOfMonth)
-        );
-
-        const monthSnap = await getDocs(monthRef);
-
-        const monthDataArray = monthSnap.docs.map((doc) => doc.data());
-        const monthTotal = monthDataArray.reduce(
-          (acc, item) => acc + item.amount,
-          0
-        );
-        setCertData(docData);
+        setCertData(totalData);
         setEventData(eventData);
-        setUserCount(userSnap.docs.length);
         setEventCount(eventSnap.docs.length);
-        setMonthly(monthTotal);
+        setTotalCert(totalSnap.docs.length)
+        setApprovedCert(approvedSnap.docs.length)
+        setPendingCert(pedningSnap.docs.length)
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -119,30 +120,40 @@ export default function DashboardAppPage() {
           </Typography>
 
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <AppWidgetSummary
-                title="Users"
-                color="info"
-                total={`${fShortenNumber(userCount)}`}
-                icon={"lucide:users-round"}
-              />
-            </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={3}>
               <AppWidgetSummary
                 title="Event"
-                total={`${fShortenNumber(eventCount)}`}
+                total={eventCount}
                 color="info"
                 icon={"clarity:event-line"}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={3}>
               <AppWidgetSummary
-                title="Montly Donations"
-                total={`₱${fCurrency(monthly)}`}
+                title="Requested Certificate"
+                total={totalCert}
                 color="info"
-                icon={"formkit:dollar"}
+                icon={"fluent:document-error-20-regular"}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <AppWidgetSummary
+                title="Approved Certificate"
+                total={approvedCert}
+                color="info"
+                icon={"carbon:task-approved"}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3}>
+              <AppWidgetSummary
+                title="Pending Certificate"
+                total={pendingCert}
+                color="info"
+                icon={"ic:baseline-pending-actions"}
               />
             </Grid>
 

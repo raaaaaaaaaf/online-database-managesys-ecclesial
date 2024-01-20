@@ -13,25 +13,25 @@ const adminConfig = [
     icon: <Iconify icon={'carbon:analytics'} />,
   },
   {
-    title: 'Members',
-    path: '/dashboard/user',
-    icon: <Iconify icon={'lucide:users-round'} />,
+    title: 'Chapel',
+    path: '/dashboard/chapel',
+    icon: <Iconify icon={'guidance:chapel'} />,
   },
   {
-    title: 'Certificates',
+    title: 'View Request',
     path: '/dashboard/certificates',
     icon: <Iconify icon={'ph:certificate-thin'} />,
+  },
+  {
+    title: 'Weekly Report',
+    path: '/dashboard/report',
+    icon: <Iconify icon={'tabler:file-report'} />,
   },
 
   {
     title: 'Event Monitoring',
     path: '/dashboard/event',
     icon: <Iconify icon={'clarity:event-line'} />,
-  },
-  {
-    title: 'Tithes Monitoring',
-    path: '/dashboard/donation',
-    icon: <Iconify icon={'formkit:dollar'} />,
   },
 ];
 
