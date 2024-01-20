@@ -66,7 +66,7 @@ const AddMember = ({ open, onClose }) => {
 
   const [confirmation, setConfirmation] = useState("");
 
-  const [marriage, setMarriage] = useState(null);
+  const [confession, setConfession] = useState("")
 
   const [cstatus, setCstatus] = useState("");
 
@@ -141,7 +141,7 @@ const AddMember = ({ open, onClose }) => {
   };
 
   const handleMChange = (event) => {
-    setMarriage(event.target.value);
+    setConfession(event.target.value);
   };
 
   const handleCHapelChange = (event) => {
@@ -466,11 +466,11 @@ const AddMember = ({ open, onClose }) => {
 
           <Grid item xs={4}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Nakasalan?</InputLabel>
+              <InputLabel id="demo-simple-select-label">Nakumpisalan?</InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={marriage}
+                value={confession}
                 label="Age"
                 onChange={handleMChange}
               >
@@ -668,10 +668,10 @@ const AddMember = ({ open, onClose }) => {
             xs={12}
             style={{ marginTop: "10px", marginBottom: "10px" }}
           >
-            {marriage === "Yes" && <Divider>If Married</Divider>}
+            {cstatus !== "Single" && <Divider>If Married</Divider>}
           </Grid>
 
-          {marriage === "Yes" && (
+          {cstatus !== "Single" && (
             <>
               <Grid item xs={3}>
                 <TextField
@@ -728,9 +728,9 @@ const AddMember = ({ open, onClose }) => {
             xs={12}
             style={{ marginTop: "10px", marginBottom: "10px" }}
           >
-            {marriage === "Yes" && <Divider>Children</Divider>}
+            {cstatus !== "Single" && <Divider>Children</Divider>}
           </Grid>
-          {marriage === "Yes" &&
+          {cstatus !== "Single" &&
             children.map((record, index) => (
               <Grid
                 container
@@ -790,7 +790,7 @@ const AddMember = ({ open, onClose }) => {
                 </Grid>
               </Grid>
             ))}
-          {marriage === "Yes" && (
+          {cstatus !== "Single" && (
             <Grid item xs={12}>
               <Divider>
                 <Button onClick={addChild}>Add Another Child</Button>

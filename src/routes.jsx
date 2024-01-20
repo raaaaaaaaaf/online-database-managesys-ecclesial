@@ -81,10 +81,6 @@ export default function Router() {
       element:  <LoginPage />,
     },
     {
-      path: 'register',
-      element: <RegisterPage />,
-    },
-    {
       path: '/dashboard',
       element: <DashboardLayout />,
       children: [
@@ -106,8 +102,6 @@ export default function Router() {
         { element: <ProtectedRoute ><Navigate to="/client/userApp" /></ProtectedRoute>, index: true },
         { path: 'userApp', element: <ProtectedRoute ><UserDashboardAppPage /></ProtectedRoute> },
         { path: 'events', element: <ProtectedRoute ><UserEventPage /></ProtectedRoute> },
-        { path: 'baptismal', element: <ProtectedRoute ><RequestBaptismal /></ProtectedRoute> },
-        { path: 'marriage', element: <ProtectedRoute ><RequestMarriage /></ProtectedRoute> },
         { path: 'certificates', element: <ProtectedRoute ><CertificatesPage /></ProtectedRoute> },
         { path: 'certificates/baptismal/:id', element: <ProtectedRoute ><ViewBaptismal /></ProtectedRoute> },
         { path: 'certificates/marriage/:id', element: <ProtectedRoute ><ViewMarriage /></ProtectedRoute> },
