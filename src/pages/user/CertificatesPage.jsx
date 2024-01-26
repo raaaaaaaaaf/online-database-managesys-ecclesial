@@ -30,7 +30,7 @@ import Scrollbar from "../../components/scrollbar";
 import { UserListHead, UserListToolbar } from "../../sections/@dashboard/user";
 // mock
 import USERLIST from "../../_mock/user";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase/firebaseConfig";
 import { AuthContext } from "../../context/AuthContext";
 import EditBaptismal from "../../components/modal/EditBaptismal";
@@ -38,6 +38,7 @@ import EditMarriage from "../../components/modal/EditMarriage";
 import Loading from "../../components/loading/Loading";
 import { Link } from "react-router-dom";
 import RequestCert from "../../components/modal/RequestCert";
+import { toast } from "react-toastify";
 
 // ----------------------------------------------------------------------
 
@@ -140,17 +141,21 @@ export default function CertificatesPage() {
     fetchData();
   }, []);
 
-  const handleEditMarriage = (id, data) => {
-    setIdMarriage(id);
-    setDataMarriage(data);
-    setOpenMarriage(true);
+  const handleDelete = async (id) => {
+    try {
+      const dataRef = doc(db, "data_certificates", id);
+      await deleteDoc(dataRef);
+      toast.success("Deleted successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+      });
+      navigate("/client/certificates");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleEditBaptismal = (id, data) => {
-    setIdBaptismal(id);
-    setDataBaptismal(data);
-    setOpenBaptismal(true);
-  };
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -332,23 +337,7 @@ export default function CertificatesPage() {
                               </Label>
                             </TableCell>
 
-                            <TableCell align="left">
-                              {docType === "Marriage" && (
-                                <IconButton
-                                  onClick={() => handleEditMarriage(id, row)}
-                                  size="small"
-                                >
-                                  <Iconify icon={"carbon:edit"} />
-                                </IconButton>
-                              )}
-                              {docType === "Baptismal" && (
-                                <IconButton
-                                  onClick={() => handleEditBaptismal(id, row)}
-                                  size="small"
-                                >
-                                  <Iconify icon={"carbon:edit"} />
-                                </IconButton>
-                              )}
+                            <TableCell onClick={() => handleDelete(id)} align="left">
                               <IconButton size="small">
                                 <Iconify icon={"carbon:delete"} />
                               </IconButton>

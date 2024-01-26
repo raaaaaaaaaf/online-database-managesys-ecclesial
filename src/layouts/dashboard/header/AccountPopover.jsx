@@ -19,12 +19,14 @@ import { AuthContext } from "../../../context/AuthContext";
 import Loading from "../../../components/loading/Loading";
 import { auth } from "../../../firebase/firebaseConfig";
 import avt from "/assets/images/avatars/avatar_default.jpg";
+import EditMember from "../../../components/modal/EditMember";
 // ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
   const { currentUser, userData, loading } = useContext(AuthContext);
   const nav = useNavigate();
 
@@ -35,6 +37,7 @@ export default function AccountPopover() {
   const handleClose = () => {
     setOpen(null);
   };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -91,7 +94,7 @@ export default function AccountPopover() {
           >
             <Box sx={{ my: 1.5, px: 2.5 }}>
               <Typography variant="subtitle2" noWrap>
-                {currentUser.displayName}
+                {userData.displayName}
               </Typography>
               <Typography
                 variant="body2"
@@ -104,9 +107,16 @@ export default function AccountPopover() {
 
             <Divider sx={{ borderStyle: "dashed" }} />
 
+            {userData.role !== "Admin" ? (
+              <MenuItem onClick={() => setOpenModal(true)} sx={{ m: 1 }}>
+                Edit Profile
+              </MenuItem>
+            ) : null}
+
             <MenuItem onClick={logout} sx={{ m: 1 }}>
               Logout
             </MenuItem>
+            <EditMember open={openModal} onClose={() => setOpenModal(false)} />
           </Popover>
         </>
       )}

@@ -307,6 +307,18 @@ const AddMember = ({ open, onClose }) => {
         password: password,
         role: "User",
 
+        lname: formData.lname,
+        fname: formData.fname,
+        mname: formData.mname,
+
+        fatherlname: formData.fatherlname,
+        fatherfname: formData.fatherfname,
+        fathermname: formData.fathermname,
+
+        motherlname: formData.motherlname,
+        motherfname: formData.motherfname,
+        mothermname: formData.mothermname,
+
         fatherFullName: fatherFullName,
         motherFullName: motherFullName,
         address: formData.address,
@@ -323,6 +335,7 @@ const AddMember = ({ open, onClose }) => {
         age: age,
         baptized: baptized,
         confirmation: confirmation,
+        confession: confession,
         cstatus: cstatus,
         children: children,
         chapelID: chapelID,
