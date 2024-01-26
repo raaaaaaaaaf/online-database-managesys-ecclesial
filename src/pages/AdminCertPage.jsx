@@ -54,6 +54,7 @@ import { useNavigate } from "react-router-dom";
 
 const TABLE_HEAD = [
   { id: "name", label: "Recipient Name", alignRight: false },
+  { id: "chapel", label: "Chapel", alignRight: false },
   { id: "company", label: "Certificate Type", alignRight: false },
   { id: "date", label: "Date Issued", alignRight: false },
   { id: "status", label: "Status", alignRight: false },
@@ -384,7 +385,7 @@ export default function AdminCertPage() {
                           id,
                           userName,
                           isApproved,
-                          isRejected,
+                          chapel,
                           docType,
                           timeStamp,
                         } = row;
@@ -428,6 +429,8 @@ export default function AdminCertPage() {
                                 </Typography>
                               </Stack>
                             </TableCell>
+
+                            <TableCell align="left">{chapel}</TableCell>
 
                             <TableCell align="left">{docType}</TableCell>
 

@@ -78,11 +78,11 @@ const ViewBaptismal = () => {
             justifyContent="space-between"
             mb={5}
           >
-            <img
+            {/* <img
               src="/assets/logo.png"
               alt="logo"
               style={{ width: "150px", height: "150px" }}
-            />
+            /> */}
             <Grid
               container
               direction="column"

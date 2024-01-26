@@ -103,15 +103,28 @@ export default function NotificationsPopover() {
     const fetchData = async () => {
       try {
         const user = auth.currentUser;
-
+  
         // Check if user is not null before accessing its properties
         if (user) {
-          const q = query(
+          // Query for user-specific notifications
+          const userQuery = query(
             collection(db, "data_notifications"),
             where("recipientUserId", "==", user.uid)
           );
-
-          const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  
+          // Query for notifications for all users
+          const allUsersQuery = query(
+            collection(db, "data_notifications"),
+            where("recipientUserId", "==", "all_users")
+          );
+  
+          // Combine both queries using '||' (logical OR)
+          const combinedQuery = query(
+            collection(db, "data_notifications"),
+            where("recipientUserId", "in", [user.uid, "all_users"])
+          );
+  
+          const unsubscribe = onSnapshot(combinedQuery, (querySnapshot) => {
             const certificatesData = [];
             querySnapshot.forEach((doc) => {
               certificatesData.push({
@@ -119,7 +132,7 @@ export default function NotificationsPopover() {
                 ...doc.data(),
               });
             });
-
+  
             console.log("Certificates: ", certificatesData.join(", "));
             console.log(certificates);
             // Update state with the new data
@@ -127,7 +140,7 @@ export default function NotificationsPopover() {
             setTotalNotification(certificatesData.length);
             setLoading(false);
           });
-
+  
           // Cleanup function to unsubscribe when the component is unmounted
           return () => unsubscribe();
         }
@@ -135,9 +148,12 @@ export default function NotificationsPopover() {
         console.error(err);
       }
     };
-
+  
     fetchData();
   }, [auth.currentUser]);
+    // Include db in the dependency array if it's used inside the effect.
+  
+  
 
   const totalUnRead = certificates.filter(
     (item) => item.isRead === false
@@ -205,7 +221,7 @@ export default function NotificationsPopover() {
                 }
               >
                 {certificates.slice(0, 2).map((notification, index) => (
-                  <NotificationItem key={index} notification={notification} />
+                  <NotificationItem key={notification.id} notification={notification} />
                 ))}
               </List>
 
@@ -222,7 +238,7 @@ export default function NotificationsPopover() {
                   }
                 >
                   {certificates.slice(2, 5).map((notification, index) => (
-                    <NotificationItem key={index} notification={notification} />
+                    <NotificationItem key={notification.id} notification={notification} />
                   ))}
                 </List>
               )}

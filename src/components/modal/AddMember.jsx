@@ -66,7 +66,7 @@ const AddMember = ({ open, onClose }) => {
 
   const [confirmation, setConfirmation] = useState("");
 
-  const [confession, setConfession] = useState("")
+  const [confession, setConfession] = useState("");
 
   const [cstatus, setCstatus] = useState("");
 
@@ -94,6 +94,10 @@ const AddMember = ({ open, onClose }) => {
   const [chapelList, setChapelList] = useState([]);
 
   const [chapel, setChapel] = useState("");
+
+  const [chapelID, setChapelID] = useState("");
+
+  const [chapelName, setChapelName] = useState("");
 
   const [loading, setLoading] = useState(true);
 
@@ -145,7 +149,18 @@ const AddMember = ({ open, onClose }) => {
   };
 
   const handleCHapelChange = (event) => {
-    setChapel(event.target.value);
+    const selectedChapel = event.target.value;
+    const selectedChapelId = selectedChapel.id;
+    const selectedChapelName = selectedChapel.name;
+
+    // Perform any specific actions with the selected ID and name
+    console.log("Selected Chapel ID:", selectedChapelId);
+    console.log("Selected Chapel Name:", selectedChapelName);
+
+    // Update state or perform other actions as needed
+    setChapel(selectedChapel);
+    setChapelID(selectedChapelId)
+    setChapelName(selectedChapelName)
   };
 
   const handleInputChange = (e) => {
@@ -238,8 +253,8 @@ const AddMember = ({ open, onClose }) => {
         !dob ||
         !baptized ||
         !confirmation ||
-        !cstatus ||
-        !marriage
+        !confession ||
+        !cstatus
       ) {
         toast.error("Please fill out all fields.", {
           position: "top-right",
@@ -248,11 +263,13 @@ const AddMember = ({ open, onClose }) => {
         });
         return; // Exit the function if validation fails
       }
+      const birthDate2Value = dob2 ? dob2.toDate() : null;
+      const dateofmarriageValue = dom ? dom.toDate() : null;
       const res = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(res.user, {
         displayName: fullName,
       });
-      const dataRef = doc(db, "data_chapel", chapel);
+      const dataRef = doc(db, "data_chapel", chapelID);
       const memberData = {
         fullName: fullName,
         fatherFullName: fatherFullName,
@@ -266,12 +283,12 @@ const AddMember = ({ open, onClose }) => {
         name2: formData.name2,
         placeofmarriage: formData.place,
         birthDate: dob.toDate(),
-        birthDate2: dob2.toDate(),
-        dateofmarriage: dom.toDate(),
+        birthDate2: birthDate2Value,
+        dateofmarriage: dateofmarriageValue,
         age: age,
         baptized: baptized,
         confirmation: confirmation,
-        marriage: marriage,
+        confession: confession,
         cstatus: cstatus,
         children: children,
       };
@@ -301,15 +318,15 @@ const AddMember = ({ open, onClose }) => {
         name2: formData.name2,
         placeofmarriage: formData.place,
         birthDate: dob.toDate(),
-        birthDate2: dob2.toDate(),
-        dateofmarriage: dom.toDate(),
+        birthDate2: birthDate2Value,
+        dateofmarriage: dateofmarriageValue,
         age: age,
         baptized: baptized,
         confirmation: confirmation,
-        marriage: marriage,
         cstatus: cstatus,
         children: children,
-        chapelID: chapel
+        chapelID: chapelID,
+        chapelName: chapelName
       });
 
       toast.success("Successfully registered!", {
@@ -335,6 +352,7 @@ const AddMember = ({ open, onClose }) => {
       console.error(error);
     }
   };
+  console.log(chapel)
 
   return (
     <Dialog maxWidth={"md"} open={open} onClose={onClose}>
@@ -466,7 +484,9 @@ const AddMember = ({ open, onClose }) => {
 
           <Grid item xs={4}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Nakumpisalan?</InputLabel>
+              <InputLabel id="demo-simple-select-label">
+                Nakumpisalan?
+              </InputLabel>
               <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
@@ -487,11 +507,14 @@ const AddMember = ({ open, onClose }) => {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={chapel}
-                label="Age"
+                label="Chapel"
                 onChange={handleCHapelChange}
               >
                 {chapelList.map((chapel) => (
-                  <MenuItem key={chapel.id} value={chapel.id}>
+                  <MenuItem
+                    key={chapel.id}
+                    value={chapel}
+                  >
                     {chapel.name}
                   </MenuItem>
                 ))}
@@ -711,7 +734,7 @@ const AddMember = ({ open, onClose }) => {
               </Grid>
 
               <Grid item xs={3}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     sx={{ width: "100%" }}
                     label="Date of Marriage"

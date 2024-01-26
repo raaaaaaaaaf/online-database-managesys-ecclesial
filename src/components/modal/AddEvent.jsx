@@ -21,7 +21,7 @@ import {
   query,
   serverTimestamp,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { db } from "../../firebase/firebaseConfig";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -29,12 +29,15 @@ import {
   DateRangePicker,
   SingleInputTimeRangeField,
 } from "@mui/x-date-pickers-pro";
+import { AuthContext } from "../../context/AuthContext";
 
 const AddEvent = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
     event: "",
     location: "",
   });
+
+  const { currentUser } = useContext(AuthContext)
 
   const [loading, setLoading] = useState(true);
 
@@ -95,17 +98,18 @@ const AddEvent = ({ open, onClose }) => {
       const dataRef = collection(db, "data_events");
       const notificationRef = collection(db, "data_notifications");
 
+      const eventMessage = `There's a new event happening: '${formData.event}' at ${formData.location} on ${date.start}. Check it out!`;
+
       
       const notificationData = {
-        userName: "",
-        recipientUserId: "",
+        userName: "all_users",
+        recipientUserId: "all_users",
         senderUserEmail: currentUser.email,
         senderUserId: currentUser.uid,
         displayName: currentUser.displayName,
-        type: "request",
+        type: "event",
         role: "Admin",
-        docType: docType,
-        message: "Has requested a certificate",
+        message: eventMessage,
         timestamp: serverTimestamp(),
         isRead: false,
       };

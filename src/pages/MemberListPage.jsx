@@ -51,6 +51,7 @@ import EditMember from "../components/modal/EditMember";
 import { Link, useParams } from "react-router-dom";
 import { AppWidgetSummary } from "../sections/@dashboard/app";
 import { fShortenNumber } from "../utils/formatNumber";
+import ViewMember from "../components/modal/ViewMember";
 
 // ----------------------------------------------------------------------
 
@@ -60,6 +61,8 @@ const TABLE_HEAD = [
   { id: "dob", label: "Date of Birth", alignRight: false },
   { id: "age", label: "Age", alignRight: false },
   { id: "cstatus", label: "Civil Status", alignRight: false },
+  { id: "chapel", label: "Chapel", alignRight: false },
+  { id: "", label: "", alignRight: false },
 ];
 
 // ----------------------------------------------------------------------
@@ -124,6 +127,8 @@ export default function MemberListPage() {
 
   const [marriage, setMarriage] = useState(0);
 
+  const [chapelName, setChapelName] = useState("");
+
   const { id } = useParams();
 
   useEffect(() => {
@@ -139,6 +144,7 @@ export default function MemberListPage() {
             // You can include other fields in the state as needed
             setBaptismal(data.baptismal);
             setMarriage(data.marriage);
+            setChapelName(data.name);
             // ...
             setLoading(false);
           } else {
@@ -169,9 +175,6 @@ export default function MemberListPage() {
       // ...
     }
   }, [id]);
-  
-
-  console.log(members)
 
   const handleDelete = async (id) => {
     try {
@@ -185,6 +188,11 @@ export default function MemberListPage() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleView = (data) => {
+    setOpen(true);
+    setModalData(data);
   };
 
   const handleRequestSort = (event, property) => {
@@ -245,7 +253,6 @@ export default function MemberListPage() {
 
   const isNotFound = !filteredUsers.length && !!filterName;
 
-  console.log(modalData, modalID);
   return (
     <>
       <Helmet>
@@ -255,12 +262,12 @@ export default function MemberListPage() {
       <Container>
         <Grid container spacing={3}>
           <>
-          <Grid item xs={12} sm={6} md={6}>
+            <Grid item xs={12} sm={6} md={6}>
               <AppWidgetSummary
                 title="Requested Baptismal Certificate"
                 color="info"
                 total={baptismal}
-                icon={"lucide:users-round"}
+                icon={"fluent:document-error-20-regular"}
               />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
@@ -268,10 +275,10 @@ export default function MemberListPage() {
                 title="Requested Marriage Certificate"
                 color="info"
                 total={marriage}
-                icon={"lucide:users-round"}
+                icon={"fluent:document-error-20-regular"}
               />
             </Grid>
-            
+
             <Grid item xs={12} md={12} lg={12}>
               {loading ? (
                 <Loading />
@@ -364,6 +371,20 @@ export default function MemberListPage() {
                                   <TableCell align="left">{age}</TableCell>
 
                                   <TableCell align="left">{cstatus}</TableCell>
+
+                                  <TableCell align="left">
+                                    {chapelName}
+                                  </TableCell>
+                                  <TableCell align="left">
+                                    <Button
+                                      onClick={() => handleView(row)}
+                                      variant="contained"
+                                      size="large"
+                                      color="inherit"
+                                    >
+                                      <Iconify icon={"carbon-view"} />
+                                    </Button>
+                                  </TableCell>
                                 </TableRow>
                               );
                             })}
@@ -404,11 +425,10 @@ export default function MemberListPage() {
                         )}
                       </Table>
                     </TableContainer>
-
-                    <EditMember
+                    <ViewMember
                       open={open}
                       onClose={() => setOpen(false)}
-                      id={modalID}
+                      data={modalData}
                     />
                   </Scrollbar>
 

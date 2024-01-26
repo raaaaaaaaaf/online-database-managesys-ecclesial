@@ -153,7 +153,8 @@ const RequestCert = ({ open, onClose }) => {
         await updateDoc(chapelRef, updateField);
       }
 
-
+      const birthDate2Value = data.birthDate2 ? data.birthDate2.toDate() : null;
+      const dateofmarriageValue = data.dateofmarriage ? data.dateofmarriage.toDate() : null;
 
       const docData = {
         fullName: data.displayName,
@@ -162,10 +163,11 @@ const RequestCert = ({ open, onClose }) => {
         motherName: data.motherFullName,
         birthplace: data.birthplace,
         birthDate: data.birthDate.toDate(),
-        birthDate2: data.birthDate2.toDate(),
-        dateofmarriage: data.dateofmarriage.toDate(),
+        birthDate2: birthDate2Value,
+        dateofmarriage: dateofmarriageValue,
         place: data.placeofmarriage,
         docType: docType,
+        chapel: data.chapelName,
         isApproved: null,
         adminNotificationID: notificationDocRef.id,
         uid: currentUser.uid,
@@ -180,7 +182,7 @@ const RequestCert = ({ open, onClose }) => {
         autoClose: 3000,
         hideProgressBar: false,
       });
-      navigate("/dashboard/chapel");
+      navigate("/client/certificates");
     } catch (err) {
       toast.error(err.message, {
         position: "top-right",
