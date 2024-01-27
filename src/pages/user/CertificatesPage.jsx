@@ -113,7 +113,7 @@ export default function CertificatesPage() {
 
   const [dataMarriage, setDataMarriage] = useState(null);
 
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, userData } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
 
@@ -337,8 +337,8 @@ export default function CertificatesPage() {
                               </Label>
                             </TableCell>
 
-                            <TableCell onClick={() => handleDelete(id)} align="left">
-                              <IconButton size="small">
+                            <TableCell align="left">
+                              <IconButton onClick={() => handleDelete(id)} size="small">
                                 <Iconify icon={"carbon:delete"} />
                               </IconButton>
 

@@ -1,9 +1,10 @@
 import {
-    Button,
+  Button,
   Container,
   Divider,
   Grid,
   Stack,
+  TextField,
   Typography,
   useScrollTrigger,
 } from "@mui/material";
@@ -42,7 +43,6 @@ const ViewBaptismal = () => {
       };
       fetchData();
     } else {
-
       setData({});
     }
   }, [id]);
@@ -220,7 +220,6 @@ const ViewBaptismal = () => {
                 </Typography>
               </Grid>
 
-
               <Grid item xs={12}>
                 <Typography
                   variant="body1"
@@ -242,6 +241,30 @@ const ViewBaptismal = () => {
                       { month: "long" }
                     )}
                   </span>
+                </Typography>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                style={{ textAlign: "right", marginRight: "100px" }}
+              >
+                <TextField
+                  variant="standard"
+                  style={{
+                    marginTop: "20px",
+                    marginRight: "30px",
+                    width: "300px",
+                    maxWidth: "100%",
+                    
+                  }}
+                />
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  style={{ textAlign: "right",
+                  marginRight: "50px" }}
+                >
+                  Parish Priest/Secretary/Coordinator
                 </Typography>
               </Grid>
             </Grid>

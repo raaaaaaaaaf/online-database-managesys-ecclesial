@@ -43,6 +43,8 @@ const RequestCert = ({ open, onClose }) => {
 
   const [data, setData] = useState({});
 
+  const [error, setError] = useState("");
+
   const { currentUser } = useContext(AuthContext);
 
   const navigate = useNavigate();
@@ -104,6 +106,12 @@ const RequestCert = ({ open, onClose }) => {
 
   const handleDocType = (event) => {
     setDocType(event.target.value);
+
+    if (event.target.value === "Marriage" && data.cstatus === "Single") {
+      setError("You are not Married");
+    } else {
+      setError(""); // Reset error if conditions are not met
+    }
   };
 
   const handleAdd = async () => {
@@ -154,7 +162,9 @@ const RequestCert = ({ open, onClose }) => {
       }
 
       const birthDate2Value = data.birthDate2 ? data.birthDate2.toDate() : null;
-      const dateofmarriageValue = data.dateofmarriage ? data.dateofmarriage.toDate() : null;
+      const dateofmarriageValue = data.dateofmarriage
+        ? data.dateofmarriage.toDate()
+        : null;
 
       const docData = {
         fullName: data.displayName,
@@ -234,12 +244,19 @@ const RequestCert = ({ open, onClose }) => {
             </FormControl>
           </Grid>
         </Grid>
+        {error && <div style={{ color: "red" }}>{error}</div>}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
           Close
         </Button>
-        <Button onClick={handleAdd} color="primary" variant="contained">
+
+        <Button
+          onClick={handleAdd}
+          color="primary"
+          variant="contained"
+          disabled={error}
+        >
           Submit
         </Button>
       </DialogActions>
